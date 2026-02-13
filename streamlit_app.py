@@ -7,13 +7,17 @@ from datetime import datetime
 
 # --- 1. CONFIGURATION ---
 WATCHLIST_GROUPS = {
-    "Hammond Power": ["Hammond Power", "Dry Type Transformer", "Hyundai Electric", "Kraken Robotics", "DIRTT", "Atlas Engineered Products"],
-    "Tantalus": ["Tantalus", "Smart metering systems", "Kongsberg", "Boeing Defense", "Itron"],
-    "Kraken": ["Kraken", "NAVSEA", "Lockheed Martin", "L3Harris", "Airbus", "Rtx defense", "Northrop Grumman"],
-    "5N Plus": ["5N Plus", "VNP", "Germanium", "Tellurium", "Boralex", "Cadmium", "AZUR Space"],
-    "ISC": ["ISC", "Information Services Corp", "Dye & Durham"],
-    "Neo Performance": ["NEO", "Neo Performance Materials", "Rare Earth Oxides", "Rare Earth Minerals"],
-    "Calian": ["CGY", "Calian"]
+   "Hammond Power": ["Hammond Power", "Dry Type Transformer", "Hyundai Electric"],
+    "Tantalus": ["Tantalus", "Smart metering systems", "Kongsberg", "Boeing Defense", "Itron"],  # Added comma
+    "Kraken": ["Kraken", "NAVSEA", "Lockheed Martin", "L3Harris", "Airbus", "Rtx defense", "Northrop Grumman"],  # Added comma
+    "5N Plus": ["5N Plus", "VNP", "Germanium", "Tellurium", "Boralex", "Cadmium", "AZUR Space"],  # Added comma
+    "ISC": ["ISC", "Information Services Corp", "Dye & Durham"],  # Added comma
+    "Neo Performance": ["NEO", "Neo Performance Materials", "Rare Earth Oxides", "Rare Earth Minerals"],  # Added comma
+    "Polaris": ["Polaris Renewable Energy", "PIF"],  # Added comma
+    "DIRTT": ["DRT", "DIRTT"],  # Added comma
+    "Biorem": ["BRM", "Biorem"],  # Added comma
+    "Atlas": ["AEP", "Atlas Engineered Products"],  # Added comma
+    "Calian": ["CGY", "Calian"]  # Last item doesn't strictly need a comma, but it's good practice
 }
 
 # The Default Blacklist (Hidden automatically)
