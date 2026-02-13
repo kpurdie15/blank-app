@@ -12,7 +12,7 @@ MAJOR_CANADIAN_FEEDS = {
 }
 
 # This part was correct, but make sure it follows the dictionary above
-WATCHLIST_KEYWORDS = ["Aritzia", "ATZ", "NFI", "5N Plus", "VNP", "Converge", "CTS"]
+WATCHLIST_FEEDS = ["Aritzia", "ATZ", "NFI", "5N Plus", "VNP", "Converge", "CTS"]
 
 # --- 2. PAGE SETUP ---
 st.set_page_config(page_title="Equity Research Feed", layout="wide")
