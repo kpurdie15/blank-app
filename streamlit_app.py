@@ -9,17 +9,16 @@ from datetime import datetime
 # Organised into categories for dynamic filtering
 WATCHLIST_GROUPS = {
     "Hammond Power": ["Hammond Power", "Dry Type Transformer", "Hyundai Electric", "Kraken Robotics", "DIRTT", "Atlas Engineered Products"],
-    "Tantalus": ["Tantalus", "Smart metering systems", "Kongsberg", "Boeing Defense", "Itron"],
-    "Kraken": ["Kraken", "NAVSEA", "Lockheed Martin", "L3Harris", "Airbus", "Rtx defense", "Northrop Grumman"]
-    "5N Plus": ["5N Plus", "VNP", "Germanium", "Tellurium", "Boralex", "Cadmium", "AZUR Space"],
-    "ISC": ["ISC", "Information Services Corp", "Dye & Durham"],
-    "Neo Performance": ["NEO", "Neo Performance Materials", "Rare Earth Oxides", "Rare Earth Minerals"]
-    "Polaris": ["Polaris Renewable Energy", "PIF"],
-    "DIRTT": ["DRT", "DIRTT"],
-    "Biorem": ["BRM", "Biorem"],
-    "Atlas": ["AEP", "Atlas Engineered Products"],
-    "Calian": ["CGY", "Calian"],
-}
+    "Tantalus": ["Tantalus", "Smart metering systems", "Kongsberg", "Boeing Defense", "Itron"],  # Added comma
+    "Kraken": ["Kraken", "NAVSEA", "Lockheed Martin", "L3Harris", "Airbus", "Rtx defense", "Northrop Grumman"],  # Added comma
+    "5N Plus": ["5N Plus", "VNP", "Germanium", "Tellurium", "Boralex", "Cadmium", "AZUR Space"],  # Added comma
+    "ISC": ["ISC", "Information Services Corp", "Dye & Durham"],  # Added comma
+    "Neo Performance": ["NEO", "Neo Performance Materials", "Rare Earth Oxides", "Rare Earth Minerals"],  # Added comma
+    "Polaris": ["Polaris Renewable Energy", "PIF"],  # Added comma
+    "DIRTT": ["DRT", "DIRTT"],  # Added comma
+    "Biorem": ["BRM", "Biorem"],  # Added comma
+    "Atlas": ["AEP", "Atlas Engineered Products"],  # Added comma
+    "Calian": ["CGY", "Calian"]  # Last item doesn't strictly need a comma, but it's good practice
 
 LOGO_URL = "https://cormark.com/Portals/_default/Skins/Cormark/Images/Cormark_4C_183x42px.png"
 WEBSITE_URL = "https://cormark.com/"
