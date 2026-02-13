@@ -14,24 +14,30 @@ st.title("🇨🇦 Canadian Small/Mid-Cap News Tracker")
 watchlist = ["VNP.TO", "NEO.TO", "LMN.V", "CTS.TO", "SYZ.TO"]
 
 def get_ticker_news_bypass(ticker):
-    """A more aggressive way to fetch news through corporate firewalls."""
-    # We use a public search API that is often less restricted than Yahoo's main site
+    """Refined news fetcher that filters for relevancy."""
     url = f"https://query2.finance.yahoo.com/v1/finance/search?q={ticker}"
-    
-    # 'verify=False' is the magic key that ignores the SSL certificate error
     response = requests.get(url, verify=False, headers={'User-Agent': 'Mozilla/5.0'})
     data = response.json()
     
     processed_news = []
     if "news" in data:
         for item in data["news"]:
-            processed_news.append({
-                "Ticker": ticker,
-                "Date": datetime.now().strftime('%Y-%m-%d'), # Simplified date
-                "Headline": item.get('title'),
-                "Source": item.get('publisher'),
-                "URL": item.get('link')
-            })
+            # --- RELEVANCY FILTER ---
+            # 1. Check if the ticker is specifically mentioned in the 'relatedTickers' metadata
+            related = item.get('relatedTickers', ["VNP.TO", "NEO.TO", "LMN.V", "CTS.TO", "SYZ.TO"])
+            
+            # 2. Check if the ticker or a keyword is in the title
+            title = item.get('title', '').upper()
+            clean_ticker = ticker.split('.')[0] # Changes 'VNP.TO' to 'VNP'
+            
+            if clean_ticker in related or clean_ticker in title:
+                processed_news.append({
+                    "Ticker": ticker,
+                    "Date": datetime.now().strftime('%Y-%m-%d'),
+                    "Headline": item.get('title'),
+                    "Source": item.get('publisher'),
+                    "URL": item.get('link')
+                })
     return processed_news
 
 # --- APP LOGIC ---
