@@ -6,7 +6,7 @@ import ssl
 from datetime import datetime
 
 # Place this near the top of your script
-st.logo("logo.png", size="large", link="https://cormark.com")
+st.logo(https://cormark.com/Portals/_default/Skins/Cormark/Images/Cormark_4C_183x42px.png)
 
 # --- 1. CONFIGURATION ---
 WATCHLIST = ["Aritzia", "NFI Group", "5N Plus", "Converge Technology", "Lumine Group", "Sylogist"]
