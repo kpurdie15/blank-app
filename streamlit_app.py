@@ -43,7 +43,7 @@ def get_google_news(company_name):
         parsed_date = entry.get('published_parsed')
         sort_date = datetime(*parsed_date[:6]) if parsed_date else datetime(1900, 1, 1)
         
-        results.append({
+        results.append{
             "sort_key": sort_date,
             "Date": sort_date.strftime('%b %d, %Y'),
             "Company": company_name,
