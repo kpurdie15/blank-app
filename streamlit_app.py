@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import datetime
         
         # --- THE FILTERING LOGIC ---
-        if search_query:
+if search_query:
             # Only keep headlines that contain your search word
             df = df[df['Headline'].str.lower().contains(search_query)]
         
