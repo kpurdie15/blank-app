@@ -13,30 +13,30 @@ st.title("🗞️ Global News Intelligence (via Google)")
 
 # --- 2. THE SCANNER ---
 def get_google_news(company_name):
-    """Fetches ticker-specific news from Google News RSS with formatted dates."""
+    """Fetches news and prepares data for chronological sorting."""
     query = quote(f'{company_name} when:7d')
     url = f"https://news.google.com/rss/search?q={query}&hl=en-CA&gl=CA&ceid=CA:en"
     
-    # SSL bypass for corporate firewalls
     ssl_context = ssl._create_unverified_context()
     
     feed = feedparser.parse(url)
     results = []
-    for entry in feed.entries[:5]:
-        # Extract the raw date string (e.g., 'Wed, 21 Jan 2026 03:00:00 GMT')
-        raw_date = entry.get('published', '')
-        
-        # We also get a 'parsed' version from feedparser that is easier to format
+    for entry in feed.entries[:10]: # Increased to 10 results for better sorting depth
         parsed_date = entry.get('published_parsed')
+        
         if parsed_date:
-            # Format to something clean like 'Jan 21, 2026'
-            clean_date = datetime(*parsed_date[:6]).strftime('%b %d, %Y')
+            # We create a real datetime object for the computer to sort
+            sort_date = datetime(*parsed_date[:6])
+            # We create a clean string for the human to read
+            display_date = sort_date.strftime('%b %d, %Y')
         else:
-            clean_date = "Unknown"
+            sort_date = datetime(1900, 1, 1) # Fallback for missing dates
+            display_date = "Unknown"
 
         results.append({
+            "sort_key": sort_date, # Hidden column for sorting logic
+            "Date": display_date,
             "Company": company_name,
-            "Date": clean_date,  # New Date Column
             "Source": entry.source.get('title', 'Google News'),
             "Headline": entry.title,
             "Link": entry.link
@@ -44,23 +44,30 @@ def get_google_news(company_name):
     return results
 
 # --- 3. UI LOGIC ---
-if st.button("🚀 Run Global Intel Sweep", use_container_width=True):
+if st.button("🚀 Run Sorted Intel Sweep", use_container_width=True):
     all_hits = []
-    with st.spinner('Scouring global newswires...'):
+    with st.spinner('Scouring global newswires and sorting by date...'):
         for company in WATCHLIST:
             all_hits.extend(get_google_news(company))
             
     if all_hits:
+        # Convert to DataFrame
         df = pd.DataFrame(all_hits)
         
-        # Reorder columns to put Date near the front
-        df = df[["Date", "Company", "Source", "Headline", "Link"]]
+        # --- THE SORTING MAGIC ---
+        # Sort by the hidden 'sort_key' in descending order (Newest first)
+        df = df.sort_values(by="sort_key", ascending=False)
         
+        # Remove the hidden sort key before showing the user
+        display_df = df[["Date", "Company", "Source", "Headline", "Link"]]
+        
+        st.success(f"Successfully pulled and sorted {len(display_df)} headlines.")
         st.dataframe(
-            df, 
+            display_df, 
             column_config={
                 "Link": st.column_config.LinkColumn("View Full Article"),
-                "Date": st.column_config.Column(width="medium")
+                "Date": st.column_config.Column(width="small"),
+                "Company": st.column_config.Column(width="medium")
             },
             use_container_width=True, 
             hide_index=True
