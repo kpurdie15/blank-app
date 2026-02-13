@@ -6,7 +6,7 @@ import ssl
 from datetime import datetime
 
 # --- 1. CONFIGURATION ---
-WATCHLIST = ["Tantalus", "Hammond Power", "5N Plus", "Kraken Robotics", "Information Services Corp", "ISC", "Polaris Renewable Energy", "Calian", "DIRTT", "Biorem", "Atlas Engineered Products"]
+WATCHLIST = ["Tantalus", "Hammond Power", "5N Plus", "Kraken Robotics", "Information Services Corp", "ISC", "Polaris Renewable Energy", "Calian", "DIRTT", "Biorem", "Atlas Engineered Products", "NEO Performance Materials", "Lockheed Martin", "Thales"]
 
 st.set_page_config(page_title="Google Intel Sweep", layout="wide")
 st.title("Purdchuk News Screener")
