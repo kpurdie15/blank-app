@@ -3,15 +3,16 @@ import feedparser
 import pandas as pd
 from datetime import datetime
 
-# --- 1. YOUR CORE WATCHLIST ---
-# These are the official company newsrooms you wanted back
-WATCHLIST_FEEDS = {
-    "VNP.TO (5N Plus)": "https://www.globenewswire.com/RssFeed/orgId/13361",
-    "ATZ.TO (Aritzia)": "https://www.globenewswire.com/RssFeed/orgId/103681",
-    "NFI.TO (NFI Group)": "https://www.globenewswire.com/RssFeed/orgId/6618",
-    "CTS.TO (Converge)": "https://www.newswire.ca/rss/company/converge-technology-solutions-corp.rss",
-    "LMN.V (Lumine Group)": "https://www.globenewswire.com/RssFeed/orgId/160350",
-    "SYZ.TO (Sylogist)": "https://www.newsfilecorp.com/rss/company/8367"
+# Updated to use broad, reliable Canadian business sections
+MAJOR_CANADIAN_FEEDS = {
+    "Globe & Mail: Investing": "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/investing/",
+    "Globe & Mail: Business": "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/business/",
+    "CBC Business News": "https://www.cbc.ca/webfeed/rss/rss-business",
+    "Financial Post": "https://financialpost.com/category/business/feed/"
+}
+
+# The names/tickers we will look for within those broad feeds
+WATCHLIST_KEYWORDS = ["Aritzia", "ATZ", "NFI", "5N Plus", "VNP", "Converge", "CTS"]
 }
 
 # --- 2. PAGE SETUP ---
