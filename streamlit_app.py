@@ -61,6 +61,8 @@ with st.sidebar:
         default=[]
     )
 
+st.title("Purdchuk News Screener")
+
 # --- 4. UI LOGIC ---
 if st.button("Click Here to Search", use_container_width=True):
     all_hits = []
