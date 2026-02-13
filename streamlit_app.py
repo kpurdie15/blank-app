@@ -44,7 +44,7 @@ def get_google_news(company_name):
     return results
 
 # --- 3. UI LOGIC ---
-if st.button("🚀 Run Sorted Intel Sweep", use_container_width=True):
+if st.button("Click Here to Search", use_container_width=True):
     all_hits = []
     with st.spinner('Scouring global newswires and sorting by date...'):
         for company in WATCHLIST:
