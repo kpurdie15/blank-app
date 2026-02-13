@@ -11,7 +11,7 @@ st.set_page_config(page_title="Equity Research News Feed", layout="wide")
 st.title("🇨🇦 Canadian Small/Mid-Cap News Tracker")
 
 # Your watchlist
-watchlist = ["ATZ.TO", "NFI.TO", "LMN.V", "CTS.TO", "SYZ.TO"]
+watchlist = ["VNP.TO", "NEO.TO", "LMN.V", "CTS.TO", "SYZ.TO"]
 
 def get_ticker_news_bypass(ticker):
     """A more aggressive way to fetch news through corporate firewalls."""
