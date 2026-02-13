@@ -8,7 +8,7 @@ from datetime import datetime
 # --- 1. CONFIGURATION ---
 WATCHLIST = ["Tantalus", "Hammond Power", "5N Plus", "Kraken Robotics", "Information Services Corp", "ISC", "Polaris Renewable Energy", "Calian", "DIRTT", "Biorem", "Atlas Engineered Products", "NEO Performance Materials", "Lockheed Martin", "Thales"]
 
-st.set_page_config(page_title="Purdchuk News Screener")
+st.title("Purdchuk News Screener")
 
 # --- 2. THE SCANNER ---
 def get_google_news(company_name):
