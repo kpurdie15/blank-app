@@ -85,7 +85,7 @@ def get_google_news(company_name):
 st.title("Purdchuk News Screener")
 st.subheader(f"Current Watchlist: {selected_group}")
 
-if st.button(f"🚀 Execute {selected_group} Intel Sweep", use_container_width=True):
+if st.button(f" Search {selected_group} List", use_container_width=True):
     all_hits = []
     with st.spinner('Gathering intelligence...'):
         for company in WATCHLIST_GROUPS[selected_group]:
