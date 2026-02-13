@@ -9,16 +9,16 @@ from datetime import datetime
 # Organised into categories for dynamic filtering
 WATCHLIST_GROUPS = {
     "Hammond Power": ["Hammond Power", "Dry Type Transformer", "Hyundai Electric", "Kraken Robotics", "DIRTT", "Atlas Engineered Products"],
-    "Tantalus": ["Tantalus", "Smart metering systems", "Kongsberg", "Boeing Defense", "Itron"]
+    "Tantalus": ["Tantalus", "Smart metering systems", "Kongsberg", "Boeing Defense", "Itron"],
     "Kraken": ["Kraken", "NAVSEA", "Lockheed Martin", "L3Harris", "Airbus", "Rtx defense", "Northrop Grumman"]
-    "5N Plus": ["5N Plus", "VNP", "Germanium", "Tellurium", "Boralex", "Cadmium", "AZUR Space"]
-    "ISC": ["ISC", "Information Services Corp", "Dye & Durham"]
+    "5N Plus": ["5N Plus", "VNP", "Germanium", "Tellurium", "Boralex", "Cadmium", "AZUR Space"],
+    "ISC": ["ISC", "Information Services Corp", "Dye & Durham"],
     "Neo Performance": ["NEO", "Neo Performance Materials", "Rare Earth Oxides", "Rare Earth Minerals"]
-    "Polaris": ["Polaris Renewable Energy", "PIF"]
-    "DIRTT": ["DRT", "DIRTT"]
-    "Biorem": ["BRM", "Biorem"]
-    "Atlas": ["AEP", "Atlas Engineered Products"]
-    "Calian": ["CGY", "Calian"]
+    "Polaris": ["Polaris Renewable Energy", "PIF"],
+    "DIRTT": ["DRT", "DIRTT"],
+    "Biorem": ["BRM", "Biorem"],
+    "Atlas": ["AEP", "Atlas Engineered Products"],
+    "Calian": ["CGY", "Calian"],
 }
 
 LOGO_URL = "https://cormark.com/Portals/_default/Skins/Cormark/Images/Cormark_4C_183x42px.png"
