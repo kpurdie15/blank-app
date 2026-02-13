@@ -9,7 +9,7 @@ from datetime import datetime
 WATCHLIST = ["Aritzia", "NFI Group", "5N Plus", "Converge Technology", "Lumine Group", "Sylogist"]
 
 st.set_page_config(page_title="Google Intel Sweep", layout="wide")
-st.title("🗞️ Global News Intelligence (via Google)")
+st.title("Purdchuk News Screener")
 
 # --- 2. THE SCANNER ---
 def get_google_news(company_name):
