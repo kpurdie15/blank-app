@@ -5,6 +5,9 @@ from datetime import datetime
 import urllib3
 import time  # Add this at the top with other imports
 
+# Your watchlist
+watchlist = ["VNP.TO", "NEO.TO", "LMN.V", "CTS.TO", "SYZ.TO"]
+
 # ... inside your button click logic ...
 for ticker in watchlist:
     try:
@@ -19,9 +22,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 st.set_page_config(page_title="Equity Research News Feed", layout="wide")
 st.title("🇨🇦 Canadian Small/Mid-Cap News Tracker")
-
-# Your watchlist
-watchlist = ["VNP.TO", "NEO.TO", "LMN.V", "CTS.TO", "SYZ.TO"]
 
 def get_ticker_news_bypass(ticker):
     """Refined news fetcher that filters for relevancy."""
