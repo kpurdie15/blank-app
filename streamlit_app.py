@@ -10,6 +10,13 @@ WATCHLIST_GROUPS = {
     "Industrial": ["Hammond Power", "NFI Group", "5N Plus", "Kraken Robotics"],
     "Tech": ["Tantalus", "Calian", "Converge Technology", "Lumine Group"]
 }
+
+DEFAULT_BLACKLIST = [
+    "MarketBeat", "Simply Wall St", "Zacks Investment Research", 
+    "Stock Traders Daily", "Defense World", "Best Stocks", 
+    "Ticker Report", "FinancialBuzz.com", "GuruFocus"
+]
+
 LOGO_URL = "https://cormark.com/Portals/_default/Skins/Cormark/Images/Cormark_4C_183x42px.png"
 
 st.set_page_config(page_title="Purdchuk News Screener", page_icon=LOGO_URL, layout="wide")
