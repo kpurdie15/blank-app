@@ -4,16 +4,14 @@ import pandas as pd
 from datetime import datetime
 
 # Updated to use broad, reliable Canadian business sections
-MAJOR_CANADIAN_FEEDS = {
+MAJOR_CANADIAN_FEEDS =
     "Globe & Mail: Investing": "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/investing/",
     "Globe & Mail: Business": "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/business/",
     "CBC Business News": "https://www.cbc.ca/webfeed/rss/rss-business",
     "Financial Post": "https://financialpost.com/category/business/feed/"
-}
 
 # The names/tickers we will look for within those broad feeds
 WATCHLIST_KEYWORDS = ["Aritzia", "ATZ", "NFI", "5N Plus", "VNP", "Converge", "CTS"]
-}
 
 # --- 2. PAGE SETUP ---
 st.set_page_config(page_title="Equity Research Feed", layout="wide")
