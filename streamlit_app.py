@@ -15,7 +15,7 @@ st.title("Purdchuk News Screener")
 st.markdown("""
     <style>
     .news-card {
-        background-color: #f9f9f9;
+        background-color: #0072F0;
         padding: 15px;
         border-left: 5px solid #ff4b4b;
         border-radius: 5px;
