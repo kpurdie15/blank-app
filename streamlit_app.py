@@ -2,16 +2,26 @@ import streamlit as st
 import feedparser
 import pandas as pd
 from datetime import datetime
+import re
 
-# --- 1. GLOBAL CONFIGURATION (Must be at the top) ---
-# Broad Industry Feeds
-MAJOR_FEEDS = {
-    "Globe & Mail: Investing": "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/investing/",
+# --- 1. GLOBAL CONFIGURATION (Expanded Source List) ---
+# Major Canadian Business Outlets
+INDUSTRY_FEEDS = {
     "Globe & Mail: Business": "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/business/",
-    "Yahoo Finance: Top Stories": "https://finance.yahoo.com/news/rssindex"
+    "Financial Post: Top Stories": "https://financialpost.com/feed/",
+    "CBC Business News": "https://www.cbc.ca/webfeed/rss/rss-business",
+    "Yahoo Finance Canada": "https://ca.finance.yahoo.com/news/rssindex",
+    "BNN Bloomberg: Investing": "https://www.bnnbloomberg.ca/rss/investing"
 }
 
-# Company-Specific Newsrooms
+# Targeted Press Release Subjects (TMX/GlobeNewswire)
+SUBJECT_FEEDS = {
+    "M&A Activity": "https://www.globenewswire.com/RssFeed/subject/46/Mergers%20and%20Acquisitions",
+    "Earnings & Operating Results": "https://www.globenewswire.com/RssFeed/subject/28/Earnings%20Releases%20and%20Operating%20Results",
+    "Public Companies (General)": "https://www.globenewswire.com/RssFeed/subject/5/Public%20Companies"
+}
+
+# Your Core Watchlist (Official Company Newsrooms)
 WATCHLIST_FEEDS = {
     "VNP.TO (5N Plus)": "https://www.globenewswire.com/RssFeed/orgId/13361",
     "ATZ.TO (Aritzia)": "https://www.globenewswire.com/RssFeed/orgId/103681",
@@ -20,15 +30,15 @@ WATCHLIST_FEEDS = {
 }
 
 # --- 2. PAGE CONFIGURATION ---
-st.set_page_config(page_title="Equity Research Pro", layout="wide")
-st.title("💼 Multi-Source Market Intelligence")
+st.set_page_config(page_title="Market Intelligence Pro", layout="wide")
+st.title("🏛️ Professional Canadian Market Intelligence")
 
 # --- 3. UTILITY FUNCTIONS ---
-def fetch_feed(name, url):
-    """Fetches and parses RSS entries into a standardized list."""
+def fetch_feed(name, url, limit=15):
+    """Fetches RSS entries and formats them for a DataFrame."""
     feed = feedparser.parse(url)
     results = []
-    for entry in feed.entries[:10]:
+    for entry in feed.entries[:limit]:
         results.append({
             "Source": name,
             "Date": entry.get('published', datetime.now().strftime('%b %d')),
@@ -39,59 +49,66 @@ def fetch_feed(name, url):
 
 # --- 4. SIDEBAR & FILTERS ---
 with st.sidebar:
-    st.header("Intelligence Filters")
-    # Search box for keywords like 'Defense' or 'Acquisition'
-    search_query = st.text_input("🔍 Search Industry or Company", "").strip().lower()
+    st.header("Search Parameters")
+    # Supports multiple keywords: e.g., 'Defense, Contract, Boeing'
+    search_query = st.text_input("🔍 Keywords (separate with commas)", "Dividend, Acquisition, Q4").strip()
     
     st.write("---")
     st.header("Watchlist Settings")
-    selected_ticker = st.selectbox("Filter by Company", ["All"] + list(WATCHLIST_FEEDS.keys()))
-    refresh = st.button("🔄 Refresh Data", use_container_width=True)
+    selected_ticker = st.selectbox("Company Specific", ["All Companies"] + list(WATCHLIST_FEEDS.keys()))
+    
+    st.write("---")
+    st.checkbox("Include Broad Industry News", value=True, key="use_industry")
+    st.checkbox("Include M&A / Earnings Feeds", value=True, key="use_subjects")
+    
+    refresh = st.button("🔄 Execute Intel Sweep", use_container_width=True)
 
 # --- 5. MAIN APP LOGIC ---
 if refresh:
     all_news = []
     
-    with st.spinner('Gathering intelligence...'):
-        # Fetch broad industry news from Major Feeds
-        for name, url in MAJOR_FEEDS.items():
-            try:
-                all_news.extend(fetch_feed(name, url))
-            except Exception:
-                pass
-        
-        # Fetch company-specific news
-        if selected_ticker == "All":
+    with st.spinner('Scouring Canadian business outlets and wires...'):
+        # 1. Fetch from Company Newsrooms
+        if selected_ticker == "All Companies":
             for name, url in WATCHLIST_FEEDS.items():
-                try:
-                    all_news.extend(fetch_feed(name, url))
-                except Exception:
-                    pass
+                all_news.extend(fetch_feed(name, url))
         else:
-            try:
-                all_news.extend(fetch_feed(selected_ticker, WATCHLIST_FEEDS[selected_ticker]))
-            except Exception:
-                st.error(f"Could not reach feed for {selected_ticker}")
+            all_news.extend(fetch_feed(selected_ticker, WATCHLIST_FEEDS[selected_ticker]))
+        
+        # 2. Fetch from Broad Industry News (if checked)
+        if st.session_state.use_industry:
+            for name, url in INDUSTRY_FEEDS.items():
+                all_news.extend(fetch_feed(name, url))
+                
+        # 3. Fetch from Special Subjects (if checked)
+        if st.session_state.use_subjects:
+            for name, url in SUBJECT_FEEDS.items():
+                all_news.extend(fetch_feed(name, url))
 
     if all_news:
-        df = pd.DataFrame(all_news)
+        df = pd.DataFrame(all_news).drop_duplicates(subset=['Headline'])
         
-        # Apply Search Filter if user typed a keyword
+        # --- ENHANCED FILTERING LOGIC ---
         if search_query:
-            # Case-insensitive search through headlines
-            df = df[df['Headline'].str.lower().str.contains(search_query, na=False)]
+            # Convert 'gold, copper, mining' into '(gold|copper|mining)' for OR search
+            keywords = [k.strip().lower() for k in search_query.split(',')]
+            pattern = '|'.join(map(re.escape, keywords))
+            df = df[df['Headline'].str.contains(pattern, case=False, na=False)]
         
         if not df.empty:
-            st.subheader(f"Results: {search_query if search_query else 'All Headlines'}")
+            st.subheader(f"Intelligence Report for: {search_query if search_query else 'General News'}")
             st.dataframe(
                 df, 
-                column_config={"Link": st.column_config.LinkColumn("Full Article")},
+                column_config={"Link": st.column_config.LinkColumn("View Source")},
                 use_container_width=True,
                 hide_index=True
             )
+            # Export functionality
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button("📥 Export Results to CSV", data=csv, file_name="market_intel.csv", mime='text/csv')
         else:
-            st.warning(f"No headlines found matching your criteria: '{search_query}'")
+            st.warning(f"No results found for your specific keywords: '{search_query}'")
     else:
-        st.warning("No data found. Please check your internet connection.")
+        st.warning("No data retrieved. Ensure your internet connection is active.")
 else:
-    st.info("Welcome! Use the sidebar to set your search criteria and click 'Refresh' to load data.")
+    st.info("Set your criteria in the sidebar and click 'Execute Intel Sweep' to begin.")
