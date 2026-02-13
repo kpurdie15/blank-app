@@ -11,6 +11,19 @@ WATCHLIST = ["Tantalus", "Hammond Power", "5N Plus", "Kraken Robotics", "Informa
 st.set_page_config(page_title="Google Intel Sweep", layout="wide")
 st.title("Purdchuk News Screener")
 
+# --- 2. SIDEBAR CONTROLS ---
+with st.sidebar:
+    st.header("Settings & Sorting")
+    # Dropdown to choose the primary organization of the table
+    sort_choice = st.selectbox(
+        "Organize Table By:",
+        ["Newest First", "Source Name (A-Z)", "Company Name"]
+    )
+    
+    keyword_filter = st.text_input("🔍 Quick Keyword Filter", "").strip().lower()
+
+st.title("Purdchuk News Screener")
+
 # --- 2. THE SCANNER ---
 def get_google_news(company_name):
     """Fetches news and prepares data for chronological sorting."""
