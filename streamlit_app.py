@@ -3,6 +3,16 @@ import pandas as pd
 import requests
 from datetime import datetime
 import urllib3
+import time  # Add this at the top with other imports
+
+# ... inside your button click logic ...
+for ticker in watchlist:
+    try:
+        ticker_news = get_ticker_news_bypass(ticker)
+        all_news.extend(ticker_news)
+        time.sleep(1.5)  # Wait 1.5 seconds between each ticker
+    except Exception as e:
+        st.error(f"Network Block on {ticker}: Connection reset.")
 
 # This hides the 'Insecure Request' warning text from your app
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
