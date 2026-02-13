@@ -1,71 +1,117 @@
 import streamlit as st
 import pandas as pd
+import feedparser
 import requests
+import yfinance as yf
 from datetime import datetime
 import urllib3
-import time  # Add this at the top with other imports
+import io
 
-# Your watchlist
-watchlist = ["VNP.TO", "NEO.TO", "LMN.V", "CTS.TO", "SYZ.TO"]
-
-# ... inside your button click logic ...
-for ticker in watchlist:
-    try:
-        ticker_news = get_ticker_news_bypass(ticker)
-        all_news.extend(ticker_news)
-        time.sleep(1.5)  # Wait 1.5 seconds between each ticker
-    except Exception as e:
-        st.error(f"Network Block on {ticker}: Connection reset.")
-
-# This hides the 'Insecure Request' warning text from your app
+# 1. FIREWALL BYPASS: Force Python to ignore corporate SSL issues globally
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+session = requests.Session()
+session.verify = False  # Tells all requests to ignore the 'Self-signed certificate' error
 
-st.set_page_config(page_title="Equity Research News Feed", layout="wide")
-st.title("🇨🇦 Canadian Small/Mid-Cap News Tracker")
+# 2. WATCHLIST CONFIGURATION: Official Website RSS Feeds
+# These links point directly to each company's press release room
+WATCHLIST_FEEDS = {
+    "VNP.TO (5N Plus)": "https://www.globenewswire.com/RssFeed/orgId/13361",
+    "ATZ.TO (Aritzia)": "https://www.globenewswire.com/RssFeed/orgId/103681",
+    "NFI.TO (NFI Group)": "https://www.globenewswire.com/RssFeed/orgId/6618",
+    "CTS.TO (Converge)": "https://www.newswire.ca/rss/company/converge-technology-solutions-corp.rss",
+    "LMN.V (Lumine Group)": "https://www.globenewswire.com/RssFeed/orgId/160350",
+    "SYZ.TO (Sylogist)": "https://www.newsfilecorp.com/rss/company/8367"
+}
 
-def get_ticker_news_bypass(ticker):
-    """Refined news fetcher that filters for relevancy."""
-    url = f"https://query2.finance.yahoo.com/v1/finance/search?q={ticker}"
-    response = requests.get(url, verify=False, headers={'User-Agent': 'Mozilla/5.0'})
-    data = response.json()
-    
-    processed_news = []
-    if "news" in data:
-        for item in data["news"]:
-            # --- RELEVANCY FILTER ---
-            # 1. Check if the ticker is specifically mentioned in the 'relatedTickers' metadata
-            related = item.get('relatedTickers', ["VNP.TO", "NEO.TO", "LMN.V", "CTS.TO", "SYZ.TO"])
-            
-            # 2. Check if the ticker or a keyword is in the title
-            title = item.get('title', '').upper()
-            clean_ticker = ticker.split('.')[0] # Changes 'VNP.TO' to 'VNP'
-            
-            if clean_ticker in related or clean_ticker in title:
-                processed_news.append({
-                    "Ticker": ticker,
-                    "Date": datetime.now().strftime('%Y-%m-%d'),
-                    "Headline": item.get('title'),
-                    "Source": item.get('publisher'),
-                    "URL": item.get('link')
-                })
-    return processed_news
+# --- PAGE SETUP ---
+st.set_page_config(page_title="Equity Research Dashboard", layout="wide")
+st.title("🗞️ Official Company Intelligence Dashboard")
+st.subheader("Direct-from-source press releases & live market data")
 
-# --- APP LOGIC ---
-if st.button('Refresh News Feed'):
+# --- UTILITY FUNCTIONS ---
+def get_rss_news(ticker_name, url):
+    """Fetches the 5 most recent official company releases."""
+    feed = feedparser.parse(url)
+    processed = []
+    for entry in feed.entries[:5]:
+        processed.append({
+            "Ticker": ticker_name,
+            "Date": entry.get('published', datetime.now().strftime('%Y-%m-%d')),
+            "Headline": entry.title,
+            "Source": "Official Press Release",
+            "URL": entry.link
+        })
+    return processed
+
+def get_stock_price(ticker_code):
+    """Fetches stock price using yfinance with SSL bypass session."""
+    try:
+        stock = yf.Ticker(ticker_code, session=session)
+        # Fetch only the most recent close price
+        history = stock.history(period="1d")
+        if not history.empty:
+            return history['Close'].iloc[-1]
+        return "N/A"
+    except:
+        return "Locked"
+
+# --- MAIN APP LOGIC ---
+with st.sidebar:
+    st.header("Dashboard Controls")
+    refresh = st.button("🔄 Refresh All Feeds", use_container_width=True)
+    st.write("---")
+    st.info("Bypassing firewall using unverified SSL session.")
+
+if refresh:
     all_news = []
-    with st.spinner('Fetching data through firewall...'):
-        for ticker in watchlist:
+    prices = {}
+    
+    with st.spinner('Accessing corporate newsrooms and market data...'):
+        for name, url in WATCHLIST_FEEDS.items():
+            # 1. Fetch Company News
             try:
-                ticker_news = get_ticker_news_bypass(ticker)
-                all_news.extend(ticker_news)
-            except Exception as e:
-                st.error(f"Network Block on {ticker}: Connection reset by firewall.")
+                all_news.extend(get_rss_news(name, url))
+            except:
+                st.error(f"Failed to reach newsroom for {name}")
+            
+            # 2. Fetch Market Price (extracting Ticker code like VNP.TO)
+            ticker_code = name.split(' ')[0]
+            prices[ticker_code] = get_stock_price(ticker_code)
 
     if all_news:
+        # A. Display Market Metrics
+        st.subheader("Live Market Snapshots")
+        cols = st.columns(len(prices))
+        for i, (ticker, price) in enumerate(prices.items()):
+            if isinstance(price, float):
+                cols[i].metric(ticker, f"${price:.2f}")
+            else:
+                cols[i].metric(ticker, price)
+
+        # B. Display News Table
+        st.subheader("Latest Official Press Releases")
         df = pd.DataFrame(all_news)
-        st.dataframe(df, column_config={"URL": st.column_config.LinkColumn("Article")}, 
-                     hide_index=True, use_container_width=True)
+        
+        # C. Add Download Button for Export
+        @st.cache_data
+        def convert_df(df_to_save):
+            return df_to_save.to_csv(index=False).encode('utf-8')
+        
+        csv_data = convert_df(df)
+        st.download_button(
+            label="📥 Download Research Report (CSV)",
+            data=csv_data,
+            file_name=f"equity_research_{datetime.now().strftime('%Y%m%d')}.csv",
+            mime='text/csv',
+        )
+
+        st.dataframe(
+            df, 
+            column_config={"URL": st.column_config.LinkColumn("Full Article Link")},
+            hide_index=True, 
+            use_container_width=True
+        )
     else:
-        st.warning("The firewall is still blocking the connection. You may need to use a mobile hotspot.")
+        st.warning("No data found. Check your P: drive internet permissions.")
 else:
-    st.info("Click 'Refresh' to bypass firewall and load news.")
+    st.info("Welcome! Please click the 'Refresh All Feeds' button in the sidebar to load the latest company data.")
