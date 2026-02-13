@@ -8,7 +8,7 @@ from datetime import datetime
 # --- 1. CONFIGURATION & BRANDING ---
 # Organised into categories for dynamic filtering
 WATCHLIST_GROUPS = {
-    "Hammond Power": ["Hammond Power", "Dry Type Transformer", "Hyundai Electric", "Kraken Robotics", "DIRTT", "Atlas Engineered Products"],
+    "Hammond Power": ["Hammond Power", "Dry Type Transformer", "Hyundai Electric"],
     "Tantalus": ["Tantalus", "Smart metering systems", "Kongsberg", "Boeing Defense", "Itron"],  # Added comma
     "Kraken": ["Kraken", "NAVSEA", "Lockheed Martin", "L3Harris", "Airbus", "Rtx defense", "Northrop Grumman"],  # Added comma
     "5N Plus": ["5N Plus", "VNP", "Germanium", "Tellurium", "Boralex", "Cadmium", "AZUR Space"],  # Added comma
