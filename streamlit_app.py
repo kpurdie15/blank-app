@@ -5,36 +5,39 @@ from urllib.parse import quote
 import ssl
 from datetime import datetime
 
-# --- 1. CONFIGURATION ---
-WATCHLIST = ["Tantalus", "Hammond Power", "5N Plus", "Kraken Robotics", "Information Services Corp", "ISC", "Polaris Renewable Energy", "Calian", "DIRTT", "Biorem", "Atlas Engineered Products", "NEO Performance Materials", "Lockheed Martin", "Thales"]
+# --- 1. CONFIGURATION & BRANDING ---
+# Organised into categories for dynamic filtering
+WATCHLIST_GROUPS = {
+    "Industrial/Manufacturing": ["Hammond Power", "NFI Group", "5N Plus", "Kraken Robotics", "DIRTT", "Atlas Engineered Products"],
+    "Technology/Services": ["Tantalus", "Information Services Corp", "Calian", "Converge Technology", "Sylogist", "Lumine Group"],
+    "Renewable Energy": ["Polaris Renewable Energy", "Biorem", "Boralex", "Innergex Renewable"]
+}
 
-st.title("Purdchuk News Screener")
+LOGO_URL = "https://cormark.com/Portals/_default/Skins/Cormark/Images/Cormark_4C_183x42px.png"
+WEBSITE_URL = "https://cormark.com/"
 
-# --- 2. THE SCANNER ---
+st.set_page_config(page_title="Purdchuk News Screener", page_icon=LOGO_URL, layout="wide")
+st.logo(LOGO_URL, link=WEBSITE_URL)
+
+# Initialize data persistence
+if 'news_data' not in st.session_state:
+    st.session_state.news_data = []
+
+# --- 2. THE SCANNER ENGINE ---
 def get_google_news(company_name):
-    """Fetches news and prepares data for chronological sorting."""
     query = quote(f'{company_name} when:7d')
     url = f"https://news.google.com/rss/search?q={query}&hl=en-CA&gl=CA&ceid=CA:en"
-    
     ssl_context = ssl._create_unverified_context()
     
     feed = feedparser.parse(url)
     results = []
-    for entry in feed.entries[:10]: # Increased to 10 results for better sorting depth
+    for entry in feed.entries[:5]:
         parsed_date = entry.get('published_parsed')
+        sort_date = datetime(*parsed_date[:6]) if parsed_date else datetime(1900, 1, 1)
         
-        if parsed_date:
-            # We create a real datetime object for the computer to sort
-            sort_date = datetime(*parsed_date[:6])
-            # We create a clean string for the human to read
-            display_date = sort_date.strftime('%b %d, %Y')
-        else:
-            sort_date = datetime(1900, 1, 1) # Fallback for missing dates
-            display_date = "Unknown"
-
         results.append({
-            "sort_key": sort_date, # Hidden column for sorting logic
-            "Date": display_date,
+            "sort_key": sort_date,
+            "Date": sort_date.strftime('%b %d, %Y'),
             "Company": company_name,
             "Source": entry.source.get('title', 'Google News'),
             "Headline": entry.title,
@@ -42,34 +45,60 @@ def get_google_news(company_name):
         })
     return results
 
-# --- 3. UI LOGIC ---
-if st.button("Click Here to Search", use_container_width=True):
+# --- 3. SIDEBAR: DYNAMIC WATCHLIST SELECTION ---
+with st.sidebar:
+    st.header("Watchlist Controls")
+    # THE FILTER: Choose which watchlist to pull
+    selected_group = st.selectbox(
+        "Select Watchlist Category", 
+        options=list(WATCHLIST_GROUPS.keys())
+    )
+    
+    current_watchlist = WATCHLIST_GROUPS[selected_group]
+    st.info(f"Monitoring: {', '.join(current_watchlist)}")
+    
+    st.divider()
+    st.header("Display Settings")
+    sort_choice = st.selectbox("Primary Sort:", ["Newest First", "Source", "Company"])
+    keyword_filter = st.text_input("🔍 Quick Keyword Filter", "").strip().lower()
+
+st.title(f"Purdchuk News Screener: {selected_group}")
+
+# --- 4. UI LOGIC ---
+if st.button(f"Scan {selected_group} Watchlist", use_container_width=True):
     all_hits = []
-    with st.spinner('Scouring global newswires and sorting by date...'):
-        for company in WATCHLIST:
+    with st.spinner(f'Scouring newswires for {selected_group}...'):
+        for company in current_watchlist:
             all_hits.extend(get_google_news(company))
-            
-    if all_hits:
-        # Convert to DataFrame
-        df = pd.DataFrame(all_hits)
-        
-        # --- THE SORTING MAGIC ---
-        # Sort by the hidden 'sort_key' in descending order (Newest first)
-        df = df.sort_values(by="sort_key", ascending=False)
-        
-        # Remove the hidden sort key before showing the user
-        display_df = df[["Date", "Company", "Source", "Headline", "Link"]]
-        
-        st.success(f"Successfully pulled and sorted {len(display_df)} headlines.")
-        st.dataframe(
-            display_df, 
-            column_config={
-                "Link": st.column_config.LinkColumn("View Full Article"),
-                "Date": st.column_config.Column(width="small"),
-                "Company": st.column_config.Column(width="medium")
-            },
-            use_container_width=True, 
-            hide_index=True
-        )
+    st.session_state.news_data = all_hits
+
+if st.session_state.news_data:
+    df = pd.DataFrame(st.session_state.news_data)
+    
+    # Apply Sorting
+    if sort_choice == "Newest First":
+        df = df.sort_values(by=["sort_key", "Source"], ascending=[False, True])
+    elif sort_choice == "Source":
+        df = df.sort_values(by=["Source", "sort_key"], ascending=[True, False])
     else:
-        st.warning("No global mentions found for your watchlist this week.")
+        df = df.sort_values(by=["Company", "sort_key"], ascending=[True, False])
+
+    # Apply Keyword Filter
+    if keyword_filter:
+        mask = df['Headline'].str.lower().str.contains(keyword_filter) | df['Company'].str.lower().str.contains(keyword_filter)
+        df = df[mask]
+
+    display_df = df[["Date", "Company", "Source", "Headline", "Link"]]
+    
+    st.dataframe(
+        display_df, 
+        column_config={
+            "Link": st.column_config.LinkColumn("View Full Article"),
+            "Date": st.column_config.Column(width="small"),
+            "Company": st.column_config.Column(width="medium")
+        },
+        use_container_width=True, 
+        hide_index=True
+    )
+else:
+    st.info(f"Select a category and scan to view the {selected_group} feed.")
