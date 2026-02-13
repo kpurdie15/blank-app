@@ -38,9 +38,6 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.logo(LOGO_URL, link=WEBSITE_URL)
-
-
 # --- 2. THE SCANNER ---
 def get_google_news(company_name):
     """Fetches news and prepares data for chronological sorting."""
