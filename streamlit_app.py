@@ -11,6 +11,36 @@ WATCHLIST = ["Tantalus", "Hammond Power", "5N Plus", "Kraken Robotics", "Informa
 st.set_page_config(page_title="Google Intel Sweep", layout="wide")
 st.title("Purdchuk News Screener")
 
+# Custom CSS for a "Professional Terminal" look
+st.markdown("""
+    <style>
+    .news-card {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-left: 5px solid #ff4b4b;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        transition: 0.3s;
+    }
+    .news-card:hover {
+        background-color: #f1f1f1;
+        border-left: 5px solid #1c3d5a;
+    }
+    .source-tag {
+        color: #666;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    .time-tag {
+        color: #ff4b4b;
+        font-size: 0.8rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+st.logo(LOGO_URL, link=WEBSITE_URL)
+
+
 # --- 2. THE SCANNER ---
 def get_google_news(company_name):
     """Fetches news and prepares data for chronological sorting."""
