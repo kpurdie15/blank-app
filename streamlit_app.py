@@ -8,9 +8,17 @@ from datetime import datetime
 # --- 1. CONFIGURATION & BRANDING ---
 # Organised into categories for dynamic filtering
 WATCHLIST_GROUPS = {
-    "Industrial/Manufacturing": ["Hammond Power", "NFI Group", "5N Plus", "Kraken Robotics", "DIRTT", "Atlas Engineered Products"],
-    "Technology/Services": ["Tantalus", "Information Services Corp", "Calian", "Converge Technology", "Sylogist", "Lumine Group"],
-    "Renewable Energy": ["Polaris Renewable Energy", "Biorem", "Boralex", "Innergex Renewable"]
+    "Hammond Power": ["Hammond Power", "Dry Type Transformer", "Hyundai Electric", "Kraken Robotics", "DIRTT", "Atlas Engineered Products"],
+    "Tantalus": ["Tantalus", "Smart metering systems", "Kongsberg", "Boeing Defense", "Itron"]
+    "Kraken": ["Kraken", "NAVSEA", "Lockheed Martin", "L3Harris", "Airbus", "Rtx defense", "Northrop Grumman"]
+    "5N Plus": ["5N Plus", "VNP", "Germanium", "Tellurium", "Boralex", "Cadmium", "AZUR Space"]
+    "ISC": ["ISC", "Information Services Corp", "Dye & Durham"]
+    "Neo Performance": ["NEO", "Neo Performance Materials", "Rare Earth Oxides", "Rare Earth Minerals"]
+    "Polaris": ["Polaris Renewable Energy", "PIF"]
+    "DIRTT": ["DRT", "DIRTT"]
+    "Biorem": ["BRM", "Biorem"]
+    "Atlas": ["AEP", "Atlas Engineered Products"]
+    "Calian": ["CGY", "Calian"]
 }
 
 LOGO_URL = "https://cormark.com/Portals/_default/Skins/Cormark/Images/Cormark_4C_183x42px.png"
