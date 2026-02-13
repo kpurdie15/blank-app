@@ -3,6 +3,37 @@ import feedparser
 import pandas as pd
 from datetime import datetime
 
+# --- ADD SEARCH CRITERIA TO SIDEBAR ---
+with st.sidebar:
+    st.header("Intelligence Filters")
+    # This is where you type 'Defense', 'Acquisition', or a ticker
+    search_query = st.text_input("🔍 Search Industry or Company", "").strip().lower()
+    refresh = st.button("🔄 Refresh Data", use_container_width=True)
+
+if refresh:
+    all_news = []
+    with st.spinner('Filtering data by criteria...'):
+        # 1. Fetch data as before...
+        for name, url in WATCHLIST_FEEDS.items():
+            try:
+                news_items = get_rss_news(name, url)
+                all_news.extend(news_items)
+            except: pass
+
+    if all_news:
+        df = pd.DataFrame(all_news)
+        
+        # --- THE FILTERING LOGIC ---
+        if search_query:
+            # Only keep headlines that contain your search word
+            df = df[df['Headline'].str.lower().contains(search_query)]
+        
+        if not df.empty:
+            st.subheader(f"Results for: '{search_query if search_query else 'All Headlines'}'")
+            st.dataframe(df, use_container_width=True, hide_index=True)
+        else:
+            st.warning(f"No headlines found matching '{search_query}'.")
+
 # --- CONFIGURATION ---
 st.set_page_config(page_title="Equity Research Pro", layout="wide")
 st.title("💼 Multi-Source Market Intelligence")
