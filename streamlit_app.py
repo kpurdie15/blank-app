@@ -2,61 +2,68 @@ import streamlit as st
 import feedparser
 import pandas as pd
 from datetime import datetime
+import ssl
 
 # --- 1. GLOBAL CONFIGURATION ---
-# Use a DICTIONARY {} to map stock names to their RSS URLs
-WATCHLIST_FEEDS = {
-    "VNP.TO (5N Plus)": "https://www.globenewswire.com/RssFeed/orgId/13361",
-    "ATZ.TO (Aritzia)": "https://www.globenewswire.com/RssFeed/orgId/103681",
-    "NFI.TO (NFI Group)": "https://www.globenewswire.com/RssFeed/orgId/6618",
-    "CTS.TO (Converge)": "https://www.newswire.ca/rss/company/converge-technology-solutions-corp.rss"
+# Use the official outbound RSS feeds from major Canadian publishers
+MAJOR_CANADIAN_FEEDS = {
+    "Globe & Mail: Investing": "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/investing/",
+    "Globe & Mail: Business": "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/business/",
+    "CBC Business News": "https://www.cbc.ca/webfeed/rss/rss-business",
+    "Financial Post": "https://financialpost.com/category/business/feed/"
 }
 
+# The names/tickers we will scan for within these broad feeds
+WATCHLIST_KEYWORDS = ["Aritzia", "ATZ", "NFI", "5N Plus", "VNP", "Converge", "CTS", "Lumine", "LMN", "Sylogist", "SYZ"]
+
 # --- 2. PAGE SETUP ---
-st.set_page_config(page_title="Equity Research Feed", layout="wide")
-st.title("🇨🇦 Ticker-Specific News Feed")
+st.set_page_config(page_title="Equity Intelligence Dashboard", layout="wide")
+st.title("🏛️ Professional Market Intelligence")
+st.subheader("Scanning Globe & Mail, Financial Post, and CBC for Watchlist Mentions")
 
-# --- 3. SIDEBAR CONTROLS ---
-with st.sidebar:
-    st.header("Filter Criteria")
-    # Now .keys() will work because WATCHLIST_FEEDS is a dictionary
-    target_company = st.selectbox("Select Stock to Monitor", ["All Watchlist"] + list(WATCHLIST_FEEDS.keys()))
-    keyword_filter = st.text_input("Additional Keyword (Optional)", "").strip().lower()
-    refresh = st.button("Refresh News", use_container_width=True)
-
-# --- 4. DATA FETCHING ---
-def fetch_news(name, url):
-    feed = feedparser.parse(url)
-    results = []
-    for entry in feed.entries[:15]:
-        results.append({
-            "Ticker": name.split(' ')[0], 
-            "Date": entry.get('published', datetime.now().strftime('%b %d')),
-            "Headline": entry.title,
-            "Link": entry.link
-        })
-    return results
-
-# --- 5. MAIN LOGIC ---
-if refresh:
-    all_news = []
-    with st.spinner('Pulling official releases...'):
-        if target_company == "All Watchlist":
-            # .items() now works correctly on the dictionary
-            for name, url in WATCHLIST_FEEDS.items():
-                all_news.extend(fetch_news(name, url))
-        else:
-            all_news.extend(fetch_news(target_company, WATCHLIST_FEEDS[target_company]))
-
-    if all_news:
-        df = pd.DataFrame(all_news)
-        if keyword_filter:
-            df = df[df['Headline'].str.lower().str.contains(keyword_filter, na=False)]
+# --- 3. THE SCANNER ENGINE ---
+def fetch_and_screen_news():
+    """Fetches broad feeds and filters them for specific watchlist hits."""
+    all_hits = []
+    
+    # Bypass corporate SSL/Firewall issues
+    ssl_context = ssl._create_unverified_context()
+    
+    with st.spinner('Scanning major Canadian outlets...'):
+        for source_name, url in MAJOR_CANADIAN_FEEDS.items():
+            # Parse the feed using the SSL bypass context
+            feed = feedparser.parse(url)
             
-        if not df.empty:
-            st.dataframe(df, column_config={"Link": st.column_config.LinkColumn("Article")},
-                         use_container_width=True, hide_index=True)
-        else:
-            st.warning(f"No news found matching '{keyword_filter}'.")
+            for entry in feed.entries:
+                headline = entry.title
+                # Check if ANY of our watchlist keywords appear in the headline
+                if any(keyword.lower() in headline.lower() for keyword in WATCHLIST_KEYWORDS):
+                    all_hits.append({
+                        "Source": source_name,
+                        "Date": entry.get('published', datetime.now().strftime('%b %d')),
+                        "Headline": headline,
+                        "Link": entry.link
+                    })
+    return all_hits
+
+# --- 4. MAIN UI LOGIC ---
+if st.button("🔄 Execute Watchlist Intel Sweep", use_container_width=True):
+    results = fetch_and_screen_news()
+    
+    if results:
+        # Convert to DataFrame and remove any duplicate headlines
+        df = pd.DataFrame(results).drop_duplicates(subset=['Headline'])
+        
+        st.success(f"Found {len(df)} specific mentions of your watchlist companies.")
+        
+        # Display the results in a professional table
+        st.dataframe(
+            df, 
+            column_config={"Link": st.column_config.LinkColumn("View Full Article")},
+            use_container_width=True, 
+            hide_index=True
+        )
     else:
-        st.error("Could not retrieve news. Check your connection.")
+        st.warning("No specific mentions of your watchlist were found in the current news cycles.")
+else:
+    st.info("Click the button above to scan major Canadian newsrooms for your stocks.")
