@@ -19,7 +19,8 @@ WATCHLIST_GROUPS = {
     "Biorem": ["BRM", "Biorem"],  # Added comma
     "Atlas": ["AEP", "Atlas Engineered Products"],  # Added comma
     "Calian": ["CGY", "Calian"]  # Last item doesn't strictly need a comma, but it's good practice
-
+}
+    
 LOGO_URL = "https://cormark.com/Portals/_default/Skins/Cormark/Images/Cormark_4C_183x42px.png"
 WEBSITE_URL = "https://cormark.com/"
 
@@ -49,7 +50,7 @@ def get_google_news(company_name):
             "Source": entry.source.get('title', 'Google News'),
             "Headline": entry.title,
             "Link": entry.link
-        })
+        }
     return results
 
 # --- 3. SIDEBAR: DYNAMIC WATCHLIST SELECTION ---
