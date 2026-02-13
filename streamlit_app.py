@@ -43,27 +43,7 @@ def get_google_news(company_name):
         })
     return results
 
-# --- 3. SIDEBAR FILTERS ---
-with st.sidebar:
-    st.header("Intelligence Filters")
-    # Keyword search
-    keyword_filter = st.text_input("🔍 Keyword Search", "").strip().lower()
-    
-    # Source Multi-select
-    # We populate this only if we have data in the session state
-    available_sources = []
-    if st.session_state.news_data:
-        available_sources = sorted(list(set([item['Source'] for item in st.session_state.news_data])))
-    
-    selected_sources = st.multiselect(
-        "📰 Filter by Source", 
-        options=available_sources,
-        default=[]
-    )
-
-st.title("Purdchuk News Screener")
-
-# --- 4. UI LOGIC ---
+# --- 3. UI LOGIC ---
 if st.button("Click Here to Search", use_container_width=True):
     all_hits = []
     with st.spinner('Scouring global newswires and sorting by date...'):
