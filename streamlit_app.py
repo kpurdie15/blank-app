@@ -5,12 +5,18 @@ from urllib.parse import quote
 import ssl
 from datetime import datetime
 
-# --- 1. CONFIGURATION & BRANDING ---
+# --- 1. CONFIGURATION ---
 WATCHLIST_GROUPS = {
-    "Industrial": ["Hammond Power", "NFI Group", "5N Plus", "Kraken Robotics"],
-    "Tech": ["Tantalus", "Calian", "Converge Technology", "Lumine Group"]
+    "Hammond Power": ["Hammond Power", "Dry Type Transformer", "Hyundai Electric", "Kraken Robotics", "DIRTT", "Atlas Engineered Products"],
+    "Tantalus": ["Tantalus", "Smart metering systems", "Kongsberg", "Boeing Defense", "Itron"],
+    "Kraken": ["Kraken", "NAVSEA", "Lockheed Martin", "L3Harris", "Airbus", "Rtx defense", "Northrop Grumman"],
+    "5N Plus": ["5N Plus", "VNP", "Germanium", "Tellurium", "Boralex", "Cadmium", "AZUR Space"],
+    "ISC": ["ISC", "Information Services Corp", "Dye & Durham"],
+    "Neo Performance": ["NEO", "Neo Performance Materials", "Rare Earth Oxides", "Rare Earth Minerals"],
+    "Calian": ["CGY", "Calian"]
 }
 
+# Pre-defined list of sources to exclude by default
 DEFAULT_BLACKLIST = [
     "MarketBeat", "Simply Wall St", "Zacks Investment Research", 
     "Stock Traders Daily", "Defense World", "Best Stocks", 
@@ -25,23 +31,31 @@ st.logo(LOGO_URL, link="https://cormark.com/")
 if 'news_data' not in st.session_state:
     st.session_state.news_data = []
 
-# --- 2. SIDEBAR: FILTERS & BLACKLIST ---
+# --- 2. SIDEBAR: FILTERS ---
 with st.sidebar:
-    st.header("Intelligence Filters")
-    selected_group = st.selectbox("Watchlist Category", options=list(WATCHLIST_GROUPS.keys()))
+    st.header("Watchlist Controls")
+    selected_group = st.selectbox("Select Category", options=list(WATCHLIST_GROUPS.keys()))
     
-    # SOURCE FILTERING UI
-    st.subheader("Source Control")
-    filter_mode = st.radio("Mode:", ["Show All", "Whitelist (Only these)", "Blacklist (Exclude these)"])
+    st.divider()
+    st.header("Source Management")
     
-    # We extract unique sources from the data to populate the filter
+    # We find all sources in our current data
     available_sources = []
     if st.session_state.news_data:
         available_sources = sorted(list(set([item['Source'] for item in st.session_state.news_data])))
     
-    selected_sources = st.multiselect("Select Sources:", options=available_sources)
+    # Pre-calculate which of our blacklisted items are actually present in the data
+    present_blacklist = [s for s in DEFAULT_BLACKLIST if s in available_sources]
+    
+    # UI: Users see the blacklist pre-filled
+    excluded_sources = st.multiselect(
+        "🚫 Blacklisted Sources (Hidden):", 
+        options=available_sources,
+        default=present_blacklist,
+        help="These sources are hidden from your feed. Remove them to see their content."
+    )
 
-st.title(f"Market Intelligence: {selected_group}")
+    keyword_filter = st.text_input("🔍 Headline Search", "").strip().lower()
 
 # --- 3. THE SCANNER ---
 def get_google_news(company_name):
@@ -63,10 +77,10 @@ def get_google_news(company_name):
         })
     return results
 
-# --- 4. UI LOGIC & FILTERING ---
+# --- 4. UI LOGIC ---
 if st.button(f"Scan {selected_group}", use_container_width=True):
     all_hits = []
-    with st.spinner('Scouring newswires...'):
+    with st.spinner(f'Filtering out {len(DEFAULT_BLACKLIST)} low-value sources...'):
         for company in WATCHLIST_GROUPS[selected_group]:
             all_hits.extend(get_google_news(company))
     st.session_state.news_data = all_hits
@@ -74,14 +88,18 @@ if st.button(f"Scan {selected_group}", use_container_width=True):
 if st.session_state.news_data:
     df = pd.DataFrame(st.session_state.news_data).sort_values(by="sort_key", ascending=False)
     
-    # --- DATA FILTERING ENGINE ---
-    if selected_sources:
-        if filter_mode == "Whitelist (Only these)":
-            # Keep only the sources in our list
-            df = df[df['Source'].isin(selected_sources)]
-        elif filter_mode == "Blacklist (Exclude these)":
-            # Keep everything EXCEPT the sources in our list
-            df = df[~df['Source'].isin(selected_sources)]
+    # Apply Blacklist Filter
+    if excluded_sources:
+        df = df[~df['Source'].isin(excluded_sources)]
+    
+    # Apply Keyword Filter
+    if keyword_filter:
+        df = df[df['Headline'].str.lower().str.contains(keyword_filter)]
 
-    display_df = df[["Date", "Company", "Source", "Headline", "Link"]]
-    st.dataframe(display_df, use_container_width=True, hide_index=True)
+    st.success(f"Showing {len(df)} curated headlines (Blacklist active).")
+    st.dataframe(
+        df[["Date", "Company", "Source", "Headline", "Link"]], 
+        column_config={"Link": st.column_config.LinkColumn("View")},
+        use_container_width=True, 
+        hide_index=True
+    )
