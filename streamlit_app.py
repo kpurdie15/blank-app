@@ -2,26 +2,6 @@ import streamlit as st
 import feedparser
 import pandas as pd
 from datetime import datetime
-
-# --- ADD SEARCH CRITERIA TO SIDEBAR ---
-with st.sidebar:
-    st.header("Intelligence Filters")
-    # This is where you type 'Defense', 'Acquisition', or a ticker
-    search_query = st.text_input("🔍 Search Industry or Company", "").strip().lower()
-    refresh = st.button("🔄 Refresh Data", use_container_width=True)
-
-if refresh:
-    all_news = []
-    with st.spinner('Filtering data by criteria...'):
-        # 1. Fetch data as before...
-        for name, url in WATCHLIST_FEEDS.items():
-            try:
-                news_items = get_rss_news(name, url)
-                all_news.extend(news_items)
-            except: pass
-
-    if all_news:
-        df = pd.DataFrame(all_news)
         
         # --- THE FILTERING LOGIC ---
         if search_query:
@@ -52,6 +32,26 @@ COMPANY_FEEDS = {
     "NFI.TO (NFI Group)": "https://www.globenewswire.com/RssFeed/orgId/6618",
     "CTS.TO (Converge)": "https://www.newswire.ca/rss/company/converge-technology-solutions-corp.rss"
 }
+
+# --- ADD SEARCH CRITERIA TO SIDEBAR ---
+with st.sidebar:
+    st.header("Intelligence Filters")
+    # This is where you type 'Defense', 'Acquisition', or a ticker
+    search_query = st.text_input("🔍 Search Industry or Company", "").strip().lower()
+    refresh = st.button("🔄 Refresh Data", use_container_width=True)
+
+if refresh:
+    all_news = []
+    with st.spinner('Filtering data by criteria...'):
+        # 1. Fetch data as before...
+        for name, url in WATCHLIST_FEEDS.items():
+            try:
+                news_items = get_rss_news(name, url)
+                all_news.extend(news_items)
+            except: pass
+
+    if all_news:
+        df = pd.DataFrame(all_news)
 
 def fetch_feed(name, url, is_ticker=False):
     feed = feedparser.parse(url)
