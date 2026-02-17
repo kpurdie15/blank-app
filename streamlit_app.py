@@ -4,9 +4,7 @@ import pandas as pd
 from urllib.parse import quote
 import ssl
 from datetime import datetime
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import requests  # New import for Webhooks
 
 # --- 1. CONFIGURATION ---
 WATCHLIST_GROUPS = {
@@ -32,33 +30,29 @@ st.logo(LOGO_URL, link="https://cormark.com/")
 if 'news_data' not in st.session_state:
     st.session_state.news_data = []
 
-# --- 2. EMAIL UTILITY FUNCTION ---
-def send_email_notification(df, group_name, target_email, app_password, sender_email):
-    if df.empty:
+# --- 2. WEBHOOK ALERT FUNCTION (No Password Required) ---
+def trigger_webhook_alert(df, group_name, webhook_url):
+    if df.empty or not webhook_url:
         return
     
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
-    msg['To'] = target_email
-    msg['Subject'] = f"🚀 Purdchuk Alert: {group_name} Intelligence Update"
-
-    # Minimalist HTML Table for the Email
-    html_content = f"""
-    <h3>Latest Headlines for {group_name}</h3>
-    <p>The following news was captured based on your active filters:</p>
-    {df[['Date', 'Company', 'Source', 'Headline']].to_html(index=False, border=0)}
-    <br>
-    <p><i>Sent via Purdchuk News Screener</i></p>
-    """
-    msg.attach(MIMEText(html_content, 'html'))
-
+    # Convert headlines to a simple text list for the alert
+    headlines_list = "\n".join([f"- {row['Company']}: {row['Headline']}" for _, row in df.head(10).iterrows()])
+    
+    payload = {
+        "group": group_name,
+        "message": f"New intelligence found for {group_name}!",
+        "headlines": headlines_list,
+        "count": len(df)
+    }
+    
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(sender_email, app_password)
-            server.send_message(msg)
-        st.toast(f"Email sent to {target_email}!", icon="📧")
+        response = requests.post(webhook_url, json=payload)
+        if response.status_code == 200:
+            st.toast("Alert triggered via Webhook!", icon="🚀")
+        else:
+            st.error(f"Webhook failed: {response.status_code}")
     except Exception as e:
-        st.error(f"Email failed: {e}")
+        st.error(f"Alert Error: {e}")
 
 # --- 3. SIDEBAR ---
 with st.sidebar:
@@ -66,31 +60,32 @@ with st.sidebar:
     selected_group = st.selectbox("Watchlist Category", options=list(WATCHLIST_GROUPS.keys()))
     
     st.divider()
+    st.header("🔔 Alert System")
+    # THE RADIO BUTTON YOU REQUESTED
+    alert_mode = st.radio(
+        "Alert Settings:",
+        options=["Manual Review Only", "Send Email Alert on Search"],
+        index=0
+    )
+    
+    # You get this URL from Zapier, Make.com, or IFTTT
+    webhook_url = st.text_input("Webhook URL", placeholder="https://hooks.zapier.com/...")
+    
+    st.divider()
     st.header("Source Controls")
-    
     available_sources = sorted(list(set([item['Source'] for item in st.session_state.news_data]))) if st.session_state.news_data else []
-    
-    whitelist = st.multiselect("⭐ Whitelist (Show ONLY):", options=available_sources)
+    whitelist = st.multiselect("⭐ Whitelist:", options=available_sources)
     
     present_blacklist = [s for s in DEFAULT_BLACKLIST if s in available_sources]
-    blacklist = st.multiselect("🚫 Blacklist (Hide):", options=available_sources, default=present_blacklist)
+    blacklist = st.multiselect("🚫 Blacklist:", options=available_sources, default=present_blacklist)
 
     st.divider()
     keyword_filter = st.text_input("🔍 Search Headlines", "").strip().lower()
 
-    st.divider()
-    st.header("📧 Email Alerts")
-    enable_email = st.checkbox("Send Email on Search")
-    user_email = st.text_input("Receiver Email", "your-email@example.com")
-    # Store these in st.secrets for production!
-    sender_user = st.text_input("Sender Gmail", "your-gmail@gmail.com")
-    sender_pass = st.text_input("Gmail App Password", type="password")
-
-# --- 4. THE SCANNER ---
+# --- 4. SCANNER LOGIC (Same as before) ---
 def get_google_news(company_name):
     query = quote(f'{company_name} when:7d')
     url = f"https://news.google.com/rss/search?q={query}&hl=en-CA&gl=CA&ceid=CA:en"
-    ssl_context = ssl._create_unverified_context()
     feed = feedparser.parse(url)
     results = []
     for entry in feed.entries[:10]:
@@ -106,9 +101,8 @@ def get_google_news(company_name):
         })
     return results
 
-# --- 5. MAIN UI & LOGIC ---
+# --- 5. MAIN UI ---
 st.title("Purdchuk News Screener")
-st.subheader(f"Current Watchlist: {selected_group}")
 
 if st.button(f" Search {selected_group} List", use_container_width=True):
     all_hits = []
@@ -120,23 +114,18 @@ if st.button(f" Search {selected_group} List", use_container_width=True):
 if st.session_state.news_data:
     df = pd.DataFrame(st.session_state.news_data).sort_values(by="sort_key", ascending=False)
     
-    # Apply Filters
-    if whitelist:
-        df = df[df['Source'].isin(whitelist)]
-    if blacklist:
-        df = df[~df['Source'].isin(blacklist)]
-    if keyword_filter:
-        df = df[df['Headline'].str.lower().str.contains(keyword_filter)]
+    if whitelist: df = df[df['Source'].isin(whitelist)]
+    if blacklist: df = df[~df['Source'].isin(blacklist)]
+    if keyword_filter: df = df[df['Headline'].str.lower().str.contains(keyword_filter)]
 
-    st.success(f"Curated {len(df)} headlines for your review.")
+    st.success(f"Curated {len(df)} headlines.")
     
-    # TRIGGER EMAIL
-    if enable_email and not df.empty and sender_pass:
-        send_email_notification(df, selected_group, user_email, sender_pass, sender_user)
+    # TRIGGER ALERT IF RADIO BUTTON IS SET
+    if alert_mode == "Send Email Alert on Search" and not df.empty:
+        trigger_webhook_alert(df, selected_group, webhook_url)
 
     st.dataframe(
         df[["Date", "Company", "Source", "Headline", "Link"]], 
         column_config={"Link": st.column_config.LinkColumn("View Article")},
-        use_container_width=True, 
-        hide_index=True
+        use_container_width=True, hide_index=True
     )
