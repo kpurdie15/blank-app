@@ -8,17 +8,17 @@ from datetime import datetime
 # --- 1. CONFIGURATION ---
 WATCHLIST_GROUPS = {
    "Hammond Power": ["Hammond Power", "Dry Type Transformer", "Hyundai Electric", "AEG Power Systems", "Uninterruptible Power Supply", "Schneider Electric", "Siemens", "Eaton Corp"],
-    "Tantalus": ["Tantalus", "Tantalus Systems", "Smart metering systems", "Itron", "Landis + Gyr", "Grid Tech"],
-    "Kraken": ["Kraken", "NAVSEA", "Lockheed Martin", "L3Harris", "Airbus", "Rtx defense", "Northrop Grumman", "Thales Defense", "Subsea battery", "Kongsberg", "Cellula Robotics", "Huntington Ingalls", "Teledyne Technologies", "Anduril"],
+    "Tantalus": ["Tantalus", "Tantalus Systems", "Smart metering systems", "Itron", "Landis + Gyr", "Grid Tech",],
+    "Kraken": ["Kraken", "PNG", "REMUS", "NAVSEA", "Lockheed Martin", "L3Harris", "Airbus", "Rtx defense", "Northrop Grumman", "Thales Defense", "Subsea battery", "Kongsberg", "Cellula Robotics", "Huntington Ingalls", "Teledyne Technologies", "Anduril""Covelya", "Sonardyne", "EIVA", "Forcys", "Wavefront", "Chelsea Technologies", "Voyis"],
     "5N Plus": ["5N Plus", "VNP", "Germanium", "Tellurium", "Cadmium", "AZUR Space", "Sierra Space", "Bismuth", "USA Rare Earth", "MP Materials", "First Solar"],
     "ISC": ["ISC", "Information Services Corp", "Dye & Durham", "Saskatchewan Registry", "Canada Business Registry"],
     "Neo Performance": ["NEO", "Neo Performance Materials", "Rare Earth Oxides", "Rare Earth Minerals"],
     "Polaris": ["Polaris Renewable Energy", "PIF"],
-    "DIRTT": ["DIRTT"],
+    "DIRTT": ["DIRTT", "DRT"],
     "Biorem": ["BRM", "Biorem"],
     "Atlas": ["AEP", "Atlas Engineered Products", "Canadian Roof Trusses", "Canadian Building Products"],
     "Calian": ["CGY", "Calian", "Arctic Sovereignty", "Canadian Armed Forces", "Canadian Defense", "Arctic War", "Canadian Navy"],
-   "All": ["CGY", "Calian","Hammond Power", "Dry Type Transformer", "Hyundai Electric", "AEG Power Systems", "Uninterruptible Power Supply", "Schneider Electric", "Siemens", "Eaton Corp", "Tantalus", "Tantalus Systems", "Smart metering systems", "Itron", "Landis + Gyr", "Grid Tech", "Kraken", "NAVSEA", "Lockheed Martin", "L3Harris", "Airbus", "Rtx defense", "Northrop Grumman", "Thales Defense", "Subsea battery", "Kongsberg", "Cellula Robotics", "Huntington Ingalls", "Teledyne Technologies", "Anduril", "ISC", "Information Services Corp", "Dye & Durham", "Saskatchewan Registry", "Canada Business Registry", "Polaris Renewable Energy", "PIF", "AEP", "Atlas Engineered Products", "Canadian Roof Trusses", "Canadian Building Products",  ],
+   "All": ["CGY", "Calian","Hammond Power", "Dry Type Transformer", "Hyundai Electric", "AEG Power Systems", "Uninterruptible Power Supply", "Schneider Electric", "Siemens", "Eaton Corp", "Tantalus", "Tantalus Systems", "Smart metering systems", "Itron", "Landis + Gyr", "Kraken", "PNG", "REMUS", "NAVSEA", "Lockheed Martin", "L3Harris", "Airbus", "Rtx defense", "Northrop Grumman", "Thales Defense", "Subsea battery", "Kongsberg", "Cellula Robotics", "Huntington Ingalls", "Teledyne Technologies", "Anduril", "Covelya", "Sonardyne", "EIVA", "Forcys", "Wavefront", "Chelsea Technologies", "Voyis", "Grid Tech", "Kraken", "NAVSEA", "Lockheed Martin", "L3Harris", "Airbus", "Rtx defense", "Northrop Grumman", "Thales Defense", "Subsea battery", "Kongsberg", "Cellula Robotics", "Huntington Ingalls", "Teledyne Technologies", "Anduril", "ISC", "Information Services Corp", "Dye & Durham", "Saskatchewan Registry", "Canada Business Registry", "Polaris Renewable Energy", "PIF", "AEP", "Atlas Engineered Products", "Canadian Roof Trusses", "Canadian Building Products",  ],
 }
 
 # The Default Blacklist (Hidden automatically)
