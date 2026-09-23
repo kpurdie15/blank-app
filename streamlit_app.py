@@ -27,7 +27,7 @@ DEFAULT_BLACKLIST = ["nhl.com", "Motor1.com", "marketscreener.com", "MarketBeat"
 # The Default Whitelist (Premium sources you might want to isolate)
 PREMIUM_SOURCES = ["The Globe and Mail", "Bloomberg", "Reuters", "Financial Post", "CNBC", "Yahoo Finance"]
 
-LOGO_URL = "https://cormark.com/Portals/_default/Skins/Cormark/Images/Cormark_4C_183x42px.png"
+LOGO_URL = "https://atbcm.atb.com/siteassets/global-components/atb-cormarkcapitalmarkets-logo-1125x1125-white.svg"
 
 st.set_page_config(page_title="Purdchuk News Screener", page_icon=LOGO_URL, layout="wide")
 st.logo(LOGO_URL, link="https://cormark.com/")
