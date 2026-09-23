@@ -22,7 +22,7 @@ WATCHLIST_GROUPS = {
 }
 
 # The Default Blacklist (Hidden automatically)
-DEFAULT_BLACKLIST = ["nhl.com", "motor1.com", "marketscreener.com", "MarketBeat", "Simply Wall St", "Zacks Investment Research", "Stock Traders Daily", "Defense World", "Best Stocks"]
+DEFAULT_BLACKLIST = ["NHL.com", "nhl.com", "motor1.com", "marketscreener.com", "MarketBeat", "Simply Wall St", "Zacks Investment Research", "Stock Traders Daily", "Defense World", "Best Stocks"]
 
 # The Default Whitelist (Premium sources you might want to isolate)
 PREMIUM_SOURCES = ["The Globe and Mail", "Bloomberg", "Reuters", "Financial Post", "CNBC", "Yahoo Finance"]
