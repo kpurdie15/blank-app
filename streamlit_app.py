@@ -19,7 +19,9 @@ WATCHLIST_GROUPS = {
     "Atlas": ["Atlas Engineered Products", "Canadian Roof Trusses", "Canadian Building Products"],
     "Calian": ["Calian", "Arctic Sovereignty", "Canadian Armed Forces", "Canadian Defense", "Arctic War", "Canadian Navy"],
    "All": ["Planet Labs", "Eutelsat", "OneWeb", "CGY", "Calian","Hammond Power", "Dry Type Transformer", "Hyundai Electric", "AEG Power Systems", "Uninterruptible Power Supply", "Schneider Electric", "Siemens", "Eaton Corp", "Tantalus", "Tantalus Systems", "Smart metering systems", "Itron", "Landis + Gyr", "Kraken", "PNG", "REMUS", "NAVSEA", "Lockheed Martin", "L3Harris", "Airbus", "Rtx defense", "Northrop Grumman", "Thales Defense", "Subsea battery", "Kongsberg", "Cellula Robotics", "Huntington Ingalls", "Teledyne Technologies", "Anduril", "Covelya", "Sonardyne", "EIVA", "Forcys", "Wavefront", "Chelsea Technologies", "Voyis", "Grid Tech", "Polaris Renewable Energy", "PIF", "AEP", "Atlas Engineered Products", "Canadian Roof Trusses", "Canadian Building Products",  ],
+"Volatus": ["Volatus", "Volatus Aerospace", "FLT", "Red Cat Holdings", "Ondas", "Draganfly", "Unusual Machines", "AeroVironment", "Kratos Defense & Security Solutions", "Parrot", "AgEagle Aerial Systems"]
 }
+
 
 # The Default Blacklist (Hidden automatically)
 DEFAULT_BLACKLIST = ["NHL.com", "nhl.com", "motor1.com", "marketscreener.com", "MarketBeat", "Simply Wall St", "Zacks Investment Research", "Stock Traders Daily", "Defense World", "Best Stocks"]
