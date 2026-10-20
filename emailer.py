@@ -99,6 +99,10 @@ def send_email():
     sender_password = os.environ.get("SENDER_PASSWORD")
     recipient_email = os.environ.get("RECIPIENT_EMAIL")
 
+    if not sender_email or not sender_password or not recipient_email:
+        print("Error: Missing email environment variables in GitHub Secrets.")
+        return
+
     news_data = fetch_fresh_news()
     if not news_data:
         print("No fresh news found for today.")
@@ -112,10 +116,19 @@ def send_email():
     msg["To"] = recipient_email
     msg.attach(MIMEText(email_text, "plain"))
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+    # Use Port 587 with STARTTLS (bypasses GitHub Actions port 465 SSL resets)
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=30)
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
         server.login(sender_email, sender_password)
         server.sendmail(sender_email, recipient_email, msg.as_string())
-    print("Daily digest email sent successfully!")
+        server.quit()
+        print("Daily digest email sent successfully!")
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+        raise e
 
 if __name__ == "__main__":
     send_email()
