@@ -7,7 +7,6 @@ from urllib.parse import quote
 import feedparser
 
 # --- 1. OVERRIDE GLOBAL SSL FOR FEEDPARSER ---
-# Prevents Google News RSS from silently returning 0 entries on Linux runners
 ssl._create_default_https_context = ssl._create_unverified_context
 
 # --- 2. CONFIGURATION ---
@@ -64,32 +63,88 @@ def fetch_fresh_news():
             
     return group_results
 
-def build_email_body(group_results):
+def build_html_email(group_results):
     date_str = datetime.now().strftime('%B %d, %Y')
     
     all_articles = [item for items in group_results.values() for item in items]
     top_5 = sorted(all_articles, key=lambda x: x['date'], reverse=True)[:5]
 
-    body = f"Daily Watchlist News Summary\nDate: {date_str}\n\n"
-    body += "="*80 + "\nTOP 5 HEADLINES\n" + "="*80 + "\n\n"
-    
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f5f7; margin: 0; padding: 20px; color: #172b4d; }}
+            .container {{ max-width: 680px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }}
+            .header {{ background: #0f172a; color: #ffffff; padding: 28px 32px; text-align: left; border-bottom: 3px solid #2563eb; }}
+            .header h1 {{ margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }}
+            .header p {{ margin: 6px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500; }}
+            .section {{ padding: 28px 32px; border-bottom: 1px solid #e2e8f0; }}
+            .section-title {{ font-size: 13px; font-weight: 700; text-transform: uppercase; color: #2563eb; letter-spacing: 1px; margin-bottom: 20px; }}
+            .top-card {{ background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #2563eb; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; }}
+            .top-card a {{ color: #0f172a; font-size: 15px; font-weight: 600; text-decoration: none; display: block; margin-bottom: 8px; line-height: 1.4; }}
+            .top-card a:hover {{ color: #2563eb; }}
+            .meta {{ font-size: 12px; color: #64748b; font-weight: 500; }}
+            .badge {{ background: #e2e8f0; color: #334155; font-weight: 600; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-right: 8px; }}
+            .group-title {{ font-size: 16px; font-weight: 700; color: #0f172a; margin: 20px 0 12px 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; }}
+            .article-item {{ padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }}
+            .article-item:last-child {{ border-bottom: none; }}
+            .article-item a {{ color: #1e293b; font-size: 14px; font-weight: 500; text-decoration: none; display: block; margin-bottom: 4px; }}
+            .article-item a:hover {{ color: #2563eb; }}
+            .footer {{ background: #f8fafc; padding: 20px 32px; text-align: center; font-size: 12px; color: #94a3b8; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Daily Watchlist Intelligence</h1>
+                <p>Morning Executive Summary • {date_str}</p>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">TOP 5 HEADLINES</div>
+    """
+
     for idx, item in enumerate(top_5, 1):
-        body += f"{idx}. {item['title']}\n"
-        body += f"   • Source: {item['source']}\n"
-        body += f"   • Link: {item['link']}\n\n"
+        html += f"""
+        <div class="top-card">
+            <a href="{item['link']}" target="_blank">{item['title']}</a>
+            <div class="meta">
+                <span class="badge">{item['source']}</span>
+                <span>Keyword: {item['term']}</span>
+            </div>
+        </div>
+        """
 
-    body += "="*80 + "\nGROUP SUMMARIES\n" + "="*80 + "\n\n"
-    
+    html += """
+            </div>
+            <div class="section">
+                <div class="section-title">WATCHLIST GROUP SUMMARIES</div>
+    """
+
     for group, items in group_results.items():
-        body += f"{group.upper()}\n"
+        html += f'<div class="group-title">{group.upper()}</div>'
         for item in items[:3]:
-            body += f"• {item['title']}\n"
-            body += f"  - Source: {item['source']}\n"
-            body += f"  - Link: {item['link']}\n"
-        body += "\n"
+            html += f"""
+            <div class="article-item">
+                <a href="{item['link']}" target="_blank">{item['title']}</a>
+                <div class="meta">
+                    <span class="badge">{item['source']}</span>
+                </div>
+            </div>
+            """
 
-    body += "-"*80 + "\nCurated via Purdchuk News Screener"
-    return body
+    html += """
+            </div>
+            <div class="footer">
+                Curated automatically via Purdchuk News Screener • Confidential
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return html
 
 def send_email():
     api_key = os.environ.get("API_KEY", "").strip()
@@ -105,12 +160,10 @@ def send_email():
     print(f"Feeds fetched. Found updates for {len(news_data)} groups.")
     
     if not news_data:
-        print("No fresh news parsed today.")
-        email_text = f"Daily Watchlist News Summary\nDate: {datetime.now().strftime('%B %d, %Y')}\n\nNo headlines matched your criteria today."
+        html_content = f"<h3>Daily Watchlist News Summary</h3><p>Date: {datetime.now().strftime('%B %d, %Y')}</p><p>No fresh headlines matched your watchlist criteria today.</p>"
     else:
-        email_text = build_email_body(news_data)
+        html_content = build_html_email(news_data)
 
-    # --- DISPATCH VIA BREVO API ---
     url = "https://api.brevo.com/v3/smtp/email"
     headers = {
         "accept": "application/json",
@@ -121,13 +174,13 @@ def send_email():
         "sender": {"name": "Purdchuk Screener", "email": sender_email},
         "to": [{"email": recipient_email}],
         "subject": f"Daily Watchlist News Summary - {datetime.now().strftime('%B %d, %Y')}",
-        "textContent": email_text
+        "htmlContent": html_content
     }
 
     req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers)
     try:
         with urllib.request.urlopen(req) as response:
-            print(f"Email sent successfully! Status code: {response.getcode()}")
+            print(f"HTML Email sent successfully! Status code: {response.getcode()}")
     except Exception as e:
         print(f"Failed to send email via Brevo API: {e}")
         raise e
