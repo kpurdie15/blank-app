@@ -26,7 +26,7 @@ WATCHLIST_GROUPS = {
     "Calian": ["Calian", "Arctic Sovereignty", "Canadian Armed Forces", "Canadian Defense", "Arctic War", "Canadian Navy"]
 }
 
-DEFAULT_BLACKLIST = ["NHL.com", "nhl.com", "motor1.com", "marketscreener.com", "MarketBeat", "Simply Wall St", "Zacks Investment Research", "Stock Traders Daily", "Defense World", "Best Stocks"]
+DEFAULT_BLACKLIST = ["simplywall.st", "thestreet.com", "cranebriefing.com", "kalklinemedia.com", "durhamregiontransit.com", "driving.ca", "driving.com", "NHL.com", "nhl.com", "motor1.com", "marketscreener.com", "MarketBeat", "Simply Wall St", "Zacks Investment Research", "Stock Traders Daily", "Defense World", "Best Stocks"]
 
 def fetch_fresh_news():
     group_results = {}
