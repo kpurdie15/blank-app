@@ -1,8 +1,7 @@
 import os
 import ssl
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import json
+import urllib.request
 from datetime import datetime, timezone
 from urllib.parse import quote
 import feedparser
@@ -37,7 +36,7 @@ def fetch_fresh_news():
     for group, terms in WATCHLIST_GROUPS.items():
         articles = []
         for term in terms:
-            query = quote(f'{term} when:7d')  # Scrape recent entries
+            query = quote(f'{term} when:7d')
             url = f"https://news.google.com/rss/search?q={query}&hl=en-CA&gl=CA&ceid=CA:en"
             
             feed = feedparser.parse(url)
@@ -46,7 +45,6 @@ def fetch_fresh_news():
                 link = entry.get('link', '')
                 source = entry.source.get('title', 'Google News') if hasattr(entry, 'source') else 'Google News'
                 
-                # Filter blacklist and duplicate links across watchlist terms
                 if link in seen_links or source in DEFAULT_BLACKLIST:
                     continue
                 
@@ -69,7 +67,6 @@ def fetch_fresh_news():
 def build_email_body(group_results):
     date_str = datetime.now().strftime('%B %d, %Y')
     
-    # Flatten items to construct Top 5 Headlines
     all_articles = [item for items in group_results.values() for item in items]
     top_5 = sorted(all_articles, key=lambda x: x['date'], reverse=True)[:5]
 
@@ -95,12 +92,12 @@ def build_email_body(group_results):
     return body
 
 def send_email():
-    sender_email = os.environ.get("SENDER_EMAIL", "").strip()
-    sender_password = os.environ.get("SENDER_PASSWORD", "").replace(" ", "").strip()
+    api_key = os.environ.get("API_KEY", "").strip()
     recipient_email = os.environ.get("RECIPIENT_EMAIL", "").strip()
+    sender_email = os.environ.get("SENDER_EMAIL", "").strip()
 
-    if not sender_email or not sender_password or not recipient_email:
-        print("Error: Missing email environment variables in GitHub Secrets.")
+    if not api_key or not recipient_email or not sender_email:
+        print("Error: Missing API_KEY, SENDER_EMAIL, or RECIPIENT_EMAIL in environment secrets.")
         return
 
     print("Fetching news feeds...")
@@ -108,25 +105,31 @@ def send_email():
     print(f"Feeds fetched. Found updates for {len(news_data)} groups.")
     
     if not news_data:
-        print("No articles parsed from RSS feeds.")
+        print("No fresh news parsed today.")
         email_text = f"Daily Watchlist News Summary\nDate: {datetime.now().strftime('%B %d, %Y')}\n\nNo headlines matched your criteria today."
     else:
         email_text = build_email_body(news_data)
 
-    msg = MIMEMultipart()
-    msg["Subject"] = f"Daily Watchlist News Summary - {datetime.now().strftime('%B %d, %Y')}"
-    msg["From"] = sender_email
-    msg["To"] = recipient_email
-    msg.attach(MIMEText(email_text, "plain"))
+    # --- DISPATCH VIA BREVO API ---
+    url = "https://api.brevo.com/v3/smtp/email"
+    headers = {
+        "accept": "application/json",
+        "api-key": api_key,
+        "content-type": "application/json"
+    }
+    payload = {
+        "sender": {"name": "Purdchuk Screener", "email": sender_email},
+        "to": [{"email": recipient_email}],
+        "subject": f"Daily Watchlist News Summary - {datetime.now().strftime('%B %d, %Y')}",
+        "textContent": email_text
+    }
 
+    req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers)
     try:
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context, timeout=30) as server:
-            server.login(sender_email, sender_password)
-            server.sendmail(sender_email, recipient_email, msg.as_string())
-        print("Daily digest email sent successfully!")
+        with urllib.request.urlopen(req) as response:
+            print(f"Email sent successfully! Status code: {response.getcode()}")
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"Failed to send email via Brevo API: {e}")
         raise e
 
 if __name__ == "__main__":
