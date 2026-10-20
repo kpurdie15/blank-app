@@ -29,7 +29,8 @@ DEFAULT_BLACKLIST = ["NHL.com", "nhl.com", "motor1.com", "marketscreener.com", "
 def fetch_fresh_news():
     ssl_context = ssl._create_unverified_context()
     now = datetime.now(timezone.utc)
-    cutoff_time = now - timedelta(hours=20) # Only include news from the past 20 hours
+    # Use 24-hour window to catch all after-market & morning updates
+    cutoff_time = now - timedelta(hours=24)
     
     group_results = {}
     seen_links = set()
@@ -45,12 +46,14 @@ def fetch_fresh_news():
                 link = entry.get('link', '')
                 source = entry.source.get('title', 'Google News') if hasattr(entry, 'source') else 'Google News'
                 
-                # Apply blacklist & deduplication
                 if link in seen_links or source in DEFAULT_BLACKLIST:
                     continue
                 
                 parsed_date = entry.get('published_parsed')
-                pub_datetime = datetime(*parsed_date[:6], tzinfo=timezone.utc) if parsed_date else datetime(1900, 1, 1, tzinfo=timezone.utc)
+                if parsed_date:
+                    pub_datetime = datetime(*parsed_date[:6], tzinfo=timezone.utc)
+                else:
+                    pub_datetime = now
                 
                 if pub_datetime >= cutoff_time:
                     seen_links.add(link)
@@ -62,37 +65,10 @@ def fetch_fresh_news():
                         "date": pub_datetime
                     })
         if articles:
-            group_results[group] = sorted(articles, key=lambda x: x['date'], reverse=False)
+            group_results[group] = sorted(articles, key=lambda x: x['date'], reverse=True)
             
     return group_results
 
-def build_email_body(group_results):
-    date_str = datetime.now().strftime('%B %d, %Y')
-    
-    # Flatten all items to pick Top 5
-    all_articles = [item for items in group_results.values() for item in items]
-    top_5 = sorted(all_articles, key=lambda x: x['date'], reverse=True)[:5]
-
-    body = f"Daily Watchlist News Summary\nDate: {date_str}\n\n"
-    body += "="*80 + "\nTOP 5 HEADLINES\n" + "="*80 + "\n\n"
-    
-    for idx, item in enumerate(top_5, 1):
-        body += f"{idx}. {item['title']}\n"
-        body += f"   • Source: {item['source']}\n"
-        body += f"   • Link: {item['link']}\n\n"
-
-    body += "="*80 + "\nGROUP SUMMARIES\n" + "="*80 + "\n\n"
-    
-    for group, items in group_results.items():
-        body += f"{group.upper()}\n"
-        for item in items[:3]:
-            body += f"• {item['title']}\n"
-            body += f"  - Source: {item['source']}\n"
-            body += f"  - Link: {item['link']}\n"
-        body += "\n"
-
-    body += "-"*80 + "\nCurated via Purdchuk News Screener"
-    return body
 
 def send_email():
     sender_email = os.environ.get("SENDER_EMAIL", "").strip()
@@ -104,11 +80,13 @@ def send_email():
         return
 
     news_data = fetch_fresh_news()
+    
+    # Fallback message if no new articles matched the cutoff window
     if not news_data:
-        print("No fresh news found for today.")
-        return
-
-    email_text = build_email_body(news_data)
+        print("No fresh news found within cutoff window. Sending status update email.")
+        email_text = f"Daily Watchlist News Summary\nDate: {datetime.now().strftime('%B %d, %Y')}\n\nNo new headlines matched your watchlist criteria in the past 24 hours."
+    else:
+        email_text = build_email_body(news_data)
 
     msg = MIMEMultipart()
     msg["Subject"] = f"Daily Watchlist News Summary - {datetime.now().strftime('%B %d, %Y')}"
