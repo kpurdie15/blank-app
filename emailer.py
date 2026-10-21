@@ -19,7 +19,7 @@ WATCHLIST_GROUPS = {
     "5N Plus": ["Planet Labs", "Eutelsat", "OneWeb", "5N Plus", "VNP", "Germanium", "Tellurium", "Cadmium", "AZUR Space", "Sierra Space", "Bismuth", "USA Rare Earth", "MP Materials", "First Solar"],
     "Firan": ["FTG", "Firan Technologies", "Airbus Deliveries", "Boeing Deliveries", "Printed Circuit Boards", "Cockpit Products"],
     "Neo Performance": ["NEO", "Neo Performance Materials", "Rare Earth Oxides", "Rare Earth Minerals"],
-    "Polaris": ["Polaris Renewable Energy", "PIF"],
+    "Polaris": ["Polaris Renewable Energy", "PIF", "Trina Energy Storage"],
     "DIRTT": ["DIRTT", "DRT"],
     "Biorem": ["BRM", "Biorem"],
     "Atlas": ["Atlas Engineered Products", "Canadian Roof Trusses", "Canadian Building Products"],
@@ -28,7 +28,7 @@ WATCHLIST_GROUPS = {
 
 DEFAULT_BLACKLIST = [
     "NHL.com", "nhl.com", "motor1.com", "marketscreener.com", "MarketBeat", 
-    "Simply Wall St", "Zacks Investment Research", "Stock Traders Daily", "Simply Wall Street", "University of Central Florida", "Mining.com", "NerdWallet", "Semafor",
+    "Simply Wall St", "Zacks Investment Research", "Stock Traders Daily", "Simply Wall Street", "University of Central Florida", "Mining.com", "NerdWallet", "Semafor", "BusinessDesk | NZ",
     "Defense World", "Best Stocks", "The Star", "kalkine.ca", "driving.ca", "Motor1.com", "Artsy", "Yahoo! Finance Canada", "Durham Region Transit", "insauga.com", "Kalkine Media", "Team Nice Cote d'Azur", "The Motley Fool Canada"
 ]
 
