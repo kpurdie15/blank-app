@@ -29,7 +29,7 @@ WATCHLIST_GROUPS = {
 DEFAULT_BLACKLIST = [
     "NHL.com", "nhl.com", "motor1.com", "marketscreener.com", "MarketBeat", 
     "Simply Wall St", "Zacks Investment Research", "Stock Traders Daily", 
-    "Defense World", "Best Stocks"
+    "Defense World", "Best Stocks", "The Star", "kalkine.ca", "driving.ca", "Motor1.com", "Artsy", "Yahoo! Finance Canada", "Durham Region Transit", "insauga.com", "Kalkine Media"
 ]
 
 def fetch_fresh_news():
