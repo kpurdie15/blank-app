@@ -49,7 +49,7 @@ DEFAULT_BLACKLIST = [
     "University of Central Florida", "Mining.com", "NerdWallet", "Semafor", "BusinessDesk | NZ",
     "Defense World", "Best Stocks", "The Star", "kalkine.ca", "Kalkine Media", "driving.ca", 
     "Artsy", "Yahoo! Finance Canada", "Durham Region Transit", "insauga.com", 
-    "Team Nice Cote d'Azur", "The Motley Fool Canada"
+    "Team Nice Cote d'Azur", "The Motley Fool Canada", "investincotedazur", "acc.org", "American College of Cardiology", "AOL.com", "aol.com", "ATP Tour", "atptour.com", 
 ]
 
 def fetch_stock_prices():
