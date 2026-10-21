@@ -148,12 +148,19 @@ def build_html_email(group_results):
 
 def send_email():
     api_key = os.environ.get("API_KEY", "").strip()
-    recipient_email = os.environ.get("RECIPIENT_EMAIL", "").strip()
+    raw_recipients = os.environ.get("RECIPIENT_EMAIL", "").strip()
     sender_email = os.environ.get("SENDER_EMAIL", "").strip()
 
-    if not api_key or not recipient_email or not sender_email:
+    if not api_key or not raw_recipients or not sender_email:
         print("Error: Missing API_KEY, SENDER_EMAIL, or RECIPIENT_EMAIL in environment secrets.")
         return
+
+    # Parse comma-separated emails into Brevo recipient objects
+    recipient_list = [
+        {"email": email.strip()} 
+        for email in raw_recipients.split(",") 
+        if email.strip()
+    ]
 
     print("Fetching news feeds...")
     news_data = fetch_fresh_news()
@@ -172,7 +179,7 @@ def send_email():
     }
     payload = {
         "sender": {"name": "Purdchuk Screener", "email": sender_email},
-        "to": [{"email": recipient_email}],
+        "to": recipient_list,  # Passes both recipient addresses to Brevo
         "subject": f"Daily Watchlist News Summary - {datetime.now().strftime('%B %d, %Y')}",
         "htmlContent": html_content
     }
@@ -180,10 +187,7 @@ def send_email():
     req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers)
     try:
         with urllib.request.urlopen(req) as response:
-            print(f"HTML Email sent successfully! Status code: {response.getcode()}")
+            print(f"HTML Email sent successfully to {len(recipient_list)} recipient(s)! Status code: {response.getcode()}")
     except Exception as e:
         print(f"Failed to send email via Brevo API: {e}")
         raise e
-
-if __name__ == "__main__":
-    send_email()
