@@ -29,7 +29,7 @@ TICKERS = {
 
 WATCHLIST_GROUPS = {
     "Zefiro": ["Zefiro", "Well Plugging", "Abandoned Wells", "Methane Abatement", "ZEFI", "Plants and Goodwin", "Ranger Energy Services"],
-    "Volatus": ["Volatus", "Volatus Aerospace", "FLT", "Red Cat Holdings", "Ondas", "Draganfly", "Unusual Machines", "AeroVironment", "Kratos Defense & Security Solutions", "Parrot", "AgEagle Aerial Systems"],
+    "Volatus": ["Volatus", "Volatus Aerospace", "FLT", "Red Cat Holdings", "Ondas", "Draganfly", "Unusual Machines", "AeroVironment", "Kratos Defense & Security Solutions", "ParrotSA", "AgEagle Aerial Systems"],
     "Hammond Power": ["Hammond Power", "Dry Type Transformer", "Hyundai Electric", "AEG Power Systems", "Uninterruptible Power Supply", "Schneider Electric", "Siemens", "Eaton Corp", "SGB-SMIT", "SGB-SMIT IPO"],
     "Tantalus": ["Tantalus", "Tantalus Systems", "Smart metering systems", "Itron", "Landis + Gyr", "Grid Tech"],
     "Kraken": ["Kraken Robotics", "PNG", "REMUS", "NAVSEA", "Lockheed Martin", "L3Harris", "Airbus", "Rtx defense", "Northrop Grumman", "Thales Defense", "Subsea battery", "Kongsberg", "Cellula Robotics", "Huntington Ingalls", "Teledyne Technologies", "Anduril", "Covelya", "Sonardyne", "EIVA", "Forcys", "Wavefront", "Chelsea Technologies", "Voyis"],
@@ -44,7 +44,7 @@ WATCHLIST_GROUPS = {
 }
 
 DEFAULT_BLACKLIST = [
-    "NHL.com", "nhl.com", "motor1.com", "Motor1.com", "marketscreener.com", "MarketBeat", 
+    "NHL.com", "nhl.com", "motor1.com", "Motor1.com", "marketscreener.com", "MarketBeat", "EIN News", "Trefis", "electronics.economictimes.indiatimes.com"
     "Simply Wall St", "Simply Wall Street", "Zacks Investment Research", "Stock Traders Daily", 
     "University of Central Florida", "Mining.com", "NerdWallet", "Semafor", "BusinessDesk | NZ",
     "Defense World", "Best Stocks", "The Star", "kalkine.ca", "Kalkine Media", "driving.ca", 
