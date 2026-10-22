@@ -5,7 +5,6 @@ import urllib.request
 from datetime import datetime, timezone
 from urllib.parse import quote
 import feedparser
-import yfinance as yf
 
 # --- 1. OVERRIDE GLOBAL SSL FOR FEEDPARSER ---
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -29,7 +28,7 @@ TICKERS = {
 
 WATCHLIST_GROUPS = {
     "Zefiro": ["Zefiro", "Well Plugging", "Abandoned Wells", "Methane Abatement", "ZEFI", "Plants and Goodwin", "Ranger Energy Services"],
-    "Volatus": ["Volatus", "Volatus Aerospace", "FLT", "Red Cat Holdings", "Ondas", "Draganfly", "Unusual Machines", "AeroVironment", "Kratos Defense & Security Solutions", "ParrotSA", "AgEagle Aerial Systems"],
+    "Volatus": ["Volatus", "Volatus Aerospace", "FLT", "Red Cat Holdings", "Ondas", "Draganfly", "Unusual Machines", "AeroVironment", "Kratos Defense & Security Solutions", "Parrot", "AgEagle Aerial Systems"],
     "Hammond Power": ["Hammond Power", "Dry Type Transformer", "Hyundai Electric", "AEG Power Systems", "Uninterruptible Power Supply", "Schneider Electric", "Siemens", "Eaton Corp", "SGB-SMIT", "SGB-SMIT IPO"],
     "Tantalus": ["Tantalus", "Tantalus Systems", "Smart metering systems", "Itron", "Landis + Gyr", "Grid Tech"],
     "Kraken": ["Kraken Robotics", "PNG", "REMUS", "NAVSEA", "Lockheed Martin", "L3Harris", "Airbus", "Rtx defense", "Northrop Grumman", "Thales Defense", "Subsea battery", "Kongsberg", "Cellula Robotics", "Huntington Ingalls", "Teledyne Technologies", "Anduril", "Covelya", "Sonardyne", "EIVA", "Forcys", "Wavefront", "Chelsea Technologies", "Voyis"],
@@ -43,20 +42,34 @@ WATCHLIST_GROUPS = {
     "Calian": ["Calian", "Arctic Sovereignty", "Canadian Armed Forces", "Canadian Defense", "Arctic War", "Canadian Navy"]
 }
 
+# Tier 1 Premium/Mainstream Media Allowlist for Top 5 Selection
+QUALIFIED_SOURCES = [
+    "Globe and Mail", "The Globe and Mail", "Globe Investor", 
+    "Financial Times", "FT.com", 
+    "CTV News", "CTV", 
+    "Reuters", 
+    "National Post", "Financial Post", 
+    "Wall Street Journal", "WSJ", 
+    "BNN Bloomberg", "Bloomberg", 
+    "CNBC", "CBC", "CBC News", "The Canadian Press", "GlobeNewswire"
+]
+
 DEFAULT_BLACKLIST = [
-    "NHL.com", "nhl.com", "motor1.com", "Motor1.com", "marketscreener.com", "MarketBeat", "EIN News", "Trefis", "electronics.economictimes.indiatimes.com"
-    "Simply Wall St", "Simply Wall Street", "Zacks Investment Research", "Stock Traders Daily", 
+    "NHL.com", "nhl.com", "motor1.com", "Motor1.com", "marketscreener.com", "MarketBeat", 
+    "EIN News", "Trefis", "electronics.economictimes.indiatimes.com", "Simply Wall St", 
+    "Simply Wall Street", "Zacks Investment Research", "Stock Traders Daily", 
     "University of Central Florida", "Mining.com", "NerdWallet", "Semafor", "BusinessDesk | NZ",
     "Defense World", "Best Stocks", "The Star", "kalkine.ca", "Kalkine Media", "driving.ca", 
     "Artsy", "Yahoo! Finance Canada", "Durham Region Transit", "insauga.com", 
-    "Team Nice Cote d'Azur", "The Motley Fool Canada", "investincotedazur", "acc.org", "American College of Cardiology", "AOL.com", "aol.com", "ATP Tour", "atptour.com", "Team Nice"
+    "Team Nice Cote d'Azur", "The Motley Fool Canada", "investincotedazur", "acc.org", 
+    "American College of Cardiology", "AOL.com", "aol.com", "ATP Tour", "atptour.com", "Team Nice"
 ]
 
 def fetch_stock_prices():
-    """Fetches real-time market quote data for watchlist tickers."""
     stock_data = []
-    symbol_string = " ".join(TICKERS.values())
     try:
+        import yfinance as yf
+        symbol_string = " ".join(TICKERS.values())
         tickers_obj = yf.Tickers(symbol_string)
         for label, symbol in TICKERS.items():
             try:
@@ -73,13 +86,12 @@ def fetch_stock_prices():
                         "is_up": change_pct >= 0
                     })
             except Exception as inner_e:
-                print(f"Warning: Failed to fetch quote for {symbol}: {inner_e}")
+                print(f"Warning: Could not fetch stock quote for {symbol}: {inner_e}")
     except Exception as e:
-        print(f"Failed to download stock quotes: {e}")
+        print(f"Warning: Stock fetching failed completely: {e}")
     return stock_data
 
 def fetch_fresh_news():
-    """Fetches Google News RSS feeds applying strict freshness and source blacklists."""
     group_results = {}
     seen_links = set()
 
@@ -89,37 +101,57 @@ def fetch_fresh_news():
             query = quote(f'{term} when:7d')
             url = f"https://news.google.com/rss/search?q={query}&hl=en-CA&gl=CA&ceid=CA:en"
             
-            feed = feedparser.parse(url)
-            
-            for entry in feed.entries[:5]:
-                link = entry.get('link', '')
-                source = entry.source.get('title', 'Google News') if hasattr(entry, 'source') else 'Google News'
-                
-                # Deduplicate links and exclude sources matching blacklist strings
-                if link in seen_links or any(b.lower() in source.lower() for b in DEFAULT_BLACKLIST):
-                    continue
-                
-                parsed_date = entry.get('published_parsed')
-                pub_datetime = datetime(*parsed_date[:6], tzinfo=timezone.utc) if parsed_date else datetime.now(timezone.utc)
-                
-                seen_links.add(link)
-                articles.append({
-                    "title": entry.title,
-                    "link": link,
-                    "source": source,
-                    "term": term,
-                    "date": pub_datetime
-                })
+            try:
+                feed = feedparser.parse(url)
+                for entry in feed.entries[:5]:
+                    link = entry.get('link', '')
+                    source = entry.source.get('title', 'Google News') if hasattr(entry, 'source') else 'Google News'
+                    
+                    if link in seen_links or any(b.lower() in source.lower() for b in DEFAULT_BLACKLIST):
+                        continue
+                    
+                    parsed_date = entry.get('published_parsed')
+                    pub_datetime = datetime(*parsed_date[:6], tzinfo=timezone.utc) if parsed_date else datetime.now(timezone.utc)
+                    
+                    seen_links.add(link)
+                    articles.append({
+                        "title": entry.title,
+                        "link": link,
+                        "source": source,
+                        "term": term,
+                        "date": pub_datetime
+                    })
+            except Exception as fe:
+                print(f"Warning: Failed parsing feed for {term}: {fe}")
+
         if articles:
             group_results[group] = sorted(articles, key=lambda x: x['date'], reverse=True)
             
     return group_results
 
-def build_html_email(group_results, stock_data):
-    """Generates the executive HTML layout containing stock tickers and headlines."""
-    date_str = datetime.now().strftime('%B %d, %Y')
+def select_top_headlines(group_results):
     all_articles = [item for items in group_results.values() for item in items]
-    top_5 = sorted(all_articles, key=lambda x: x['date'], reverse=True)[:5]
+    sorted_articles = sorted(all_articles, key=lambda x: x['date'], reverse=True)
+    
+    # Filter for qualified major tier-1 sources first
+    qualified = [
+        item for item in sorted_articles 
+        if any(qs.lower() in item['source'].lower() for qs in QUALIFIED_SOURCES)
+    ]
+    
+    # Fill remaining slots with general recent articles if qualified ones are fewer than 5
+    selected = qualified[:5]
+    if len(selected) < 5:
+        remaining_needed = 5 - len(selected)
+        seen_links = {item['link'] for item in selected}
+        fallback = [item for item in sorted_articles if item['link'] not in seen_links]
+        selected.extend(fallback[:remaining_needed])
+        
+    return selected
+
+def build_html_email(group_results, stock_data):
+    date_str = datetime.now().strftime('%B %d, %Y')
+    top_5 = select_top_headlines(group_results)
 
     html = f"""
     <!DOCTYPE html>
@@ -188,7 +220,7 @@ def build_html_email(group_results, stock_data):
 
     html += """
             <div class="section">
-                <div class="section-title">TOP 5 HEADLINES</div>
+                <div class="section-title">TOP 5 HEADLINES (MAJOR MEDIA)</div>
     """
 
     for item in top_5:
