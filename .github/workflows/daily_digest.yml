@@ -2,11 +2,9 @@ name: Daily Morning Watchlist Email
 
 on:
   schedule:
-    - cron: "17 10 * * *"
+    # 11:29 AM UTC = 7:29 AM EDT
+    - cron: "29 11 * * *"
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 jobs:
   send-email:
