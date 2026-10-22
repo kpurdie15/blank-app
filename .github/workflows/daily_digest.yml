@@ -2,8 +2,8 @@ name: Daily Morning Watchlist Email
 
 on:
   schedule:
-    # 11:29 AM UTC = 7:29 AM EDT
-    - cron: "29 11 * * *"
+    # 10:17 AM UTC = 6:17 AM EDT
+    - cron: "17 10 * * *"
   workflow_dispatch:
 
 jobs:
