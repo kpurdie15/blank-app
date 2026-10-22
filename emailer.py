@@ -67,28 +67,27 @@ DEFAULT_BLACKLIST = [
 
 def fetch_stock_prices():
     stock_data = []
-    try:
-        import yfinance as yf
-        symbol_string = " ".join(TICKERS.values())
-        tickers_obj = yf.Tickers(symbol_string)
-        for label, symbol in TICKERS.items():
-            try:
-                fast_info = tickers_obj.tickers[symbol].fast_info
-                price = fast_info.last_price
-                prev_close = fast_info.previous_close
-                if price and prev_close:
-                    change_pct = ((price - prev_close) / prev_close) * 100
-                    stock_data.append({
-                        "label": label,
-                        "symbol": symbol,
-                        "price": f"${price:.2f}",
-                        "change_pct": change_pct,
-                        "is_up": change_pct >= 0
-                    })
-            except Exception as inner_e:
-                print(f"Warning: Could not fetch stock quote for {symbol}: {inner_e}")
-    except Exception as e:
-        print(f"Warning: Stock fetching failed completely: {e}")
+    import yfinance as yf
+    
+    for label, symbol in TICKERS.items():
+        try:
+            t = yf.Ticker(symbol)
+            fast_info = t.fast_info
+            price = fast_info.get("last_price") or fast_info.get("lastPrice")
+            prev_close = fast_info.get("previous_close") or fast_info.get("previousClose")
+            
+            if price is not None and prev_close is not None:
+                change_pct = ((price - prev_close) / prev_close) * 100
+                stock_data.append({
+                    "label": label,
+                    "symbol": symbol,
+                    "price": f"${price:.2f}",
+                    "change_pct": change_pct,
+                    "is_up": change_pct >= 0
+                })
+        except Exception as inner_e:
+            print(f"Warning: Could not fetch stock quote for {symbol}: {inner_e}")
+            
     return stock_data
 
 def fetch_fresh_news():
@@ -133,13 +132,11 @@ def select_top_headlines(group_results):
     all_articles = [item for items in group_results.values() for item in items]
     sorted_articles = sorted(all_articles, key=lambda x: x['date'], reverse=True)
     
-    # Filter for qualified major tier-1 sources first
     qualified = [
         item for item in sorted_articles 
         if any(qs.lower() in item['source'].lower() for qs in QUALIFIED_SOURCES)
     ]
     
-    # Fill remaining slots with general recent articles if qualified ones are fewer than 5
     selected = qualified[:5]
     if len(selected) < 5:
         remaining_needed = 5 - len(selected)
@@ -153,45 +150,42 @@ def build_html_email(group_results, stock_data):
     date_str = datetime.now().strftime('%B %d, %Y')
     top_5 = select_top_headlines(group_results)
 
-    html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8">
-        <style>
-            body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f5f7; margin: 0; padding: 20px; color: #172b4d; }}
-            .container {{ max-width: 720px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }}
-            .header {{ background: #0f172a; color: #ffffff; padding: 28px 32px; text-align: left; border-bottom: 3px solid #2563eb; }}
-            .header h1 {{ margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }}
-            .header p {{ margin: 6px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500; }}
-            .section {{ padding: 24px 32px; border-bottom: 1px solid #e2e8f0; }}
-            .section-title {{ font-size: 12px; font-weight: 700; text-transform: uppercase; color: #2563eb; letter-spacing: 1px; margin-bottom: 16px; }}
-            
-            .ticker-grid {{ display: table; width: 100%; border-collapse: separate; border-spacing: 6px; margin-bottom: 8px; }}
-            .ticker-card {{ display: table-cell; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px; text-align: center; vertical-align: middle; }}
-            .ticker-name {{ font-size: 11px; font-weight: 700; color: #475569; display: block; }}
-            .ticker-price {{ font-size: 13px; font-weight: 700; color: #0f172a; margin: 2px 0; display: block; }}
-            .change-up {{ font-size: 11px; font-weight: 700; color: #16a34a; }}
-            .change-down {{ font-size: 11px; font-weight: 700; color: #dc2626; }}
-            
-            .top-card {{ background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #2563eb; border-radius: 6px; padding: 16px 20px; margin-bottom: 12px; }}
-            .top-card a {{ color: #0f172a; font-size: 15px; font-weight: 600; text-decoration: none; display: block; margin-bottom: 8px; line-height: 1.4; }}
-            .meta {{ font-size: 12px; color: #64748b; font-weight: 500; }}
-            .badge {{ background: #e2e8f0; color: #334155; font-weight: 600; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-right: 8px; }}
-            .group-title {{ font-size: 15px; font-weight: 700; color: #0f172a; margin: 20px 0 10px 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; }}
-            .article-item {{ padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }}
-            .article-item:last-child {{ border-bottom: none; }}
-            .article-item a {{ color: #1e293b; font-size: 14px; font-weight: 500; text-decoration: none; display: block; margin-bottom: 4px; }}
-            .footer {{ background: #f8fafc; padding: 20px 32px; text-align: center; font-size: 12px; color: #94a3b8; }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <h1>Daily Watchlist Intelligence</h1>
-                <p>Morning Executive Summary • {date_str}</p>
-            </div>
-    """
+    html = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f5f7; margin: 0; padding: 20px; color: #172b4d; }}
+        .container {{ max-width: 720px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }}
+        .header {{ background: #0f172a; color: #ffffff; padding: 28px 32px; text-align: left; border-bottom: 3px solid #2563eb; }}
+        .header h1 {{ margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }}
+        .header p {{ margin: 6px 0 0 0; font-size: 13px; color: #94a3b8; font-weight: 500; }}
+        .section {{ padding: 24px 32px; border-bottom: 1px solid #e2e8f0; }}
+        .section-title {{ font-size: 12px; font-weight: 700; text-transform: uppercase; color: #2563eb; letter-spacing: 1px; margin-bottom: 16px; }}
+        .ticker-grid {{ display: table; width: 100%; border-collapse: separate; border-spacing: 6px; margin-bottom: 8px; }}
+        .ticker-card {{ display: table-cell; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px; text-align: center; vertical-align: middle; }}
+        .ticker-name {{ font-size: 11px; font-weight: 700; color: #475569; display: block; }}
+        .ticker-price {{ font-size: 13px; font-weight: 700; color: #0f172a; margin: 2px 0; display: block; }}
+        .change-up {{ font-size: 11px; font-weight: 700; color: #16a34a; }}
+        .change-down {{ font-size: 11px; font-weight: 700; color: #dc2626; }}
+        .top-card {{ background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #2563eb; border-radius: 6px; padding: 16px 20px; margin-bottom: 12px; }}
+        .top-card a {{ color: #0f172a; font-size: 15px; font-weight: 600; text-decoration: none; display: block; margin-bottom: 8px; line-height: 1.4; }}
+        .meta {{ font-size: 12px; color: #64748b; font-weight: 500; }}
+        .badge {{ background: #e2e8f0; color: #334155; font-weight: 600; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-right: 8px; }}
+        .group-title {{ font-size: 15px; font-weight: 700; color: #0f172a; margin: 20px 0 10px 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; }}
+        .article-item {{ padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }}
+        .article-item:last-child {{ border-bottom: none; }}
+        .article-item a {{ color: #1e293b; font-size: 14px; font-weight: 500; text-decoration: none; display: block; margin-bottom: 4px; }}
+        .footer {{ background: #f8fafc; padding: 20px 32px; text-align: center; font-size: 12px; color: #94a3b8; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Daily Watchlist Intelligence</h1>
+            <p>Morning Executive Summary • {date_str}</p>
+        </div>
+"""
 
     if stock_data:
         html += """
@@ -219,8 +213,8 @@ def build_html_email(group_results, stock_data):
         """
 
     html += """
-            <div class="section">
-                <div class="section-title">TOP 5 HEADLINES (MAJOR MEDIA)</div>
+        <div class="section">
+            <div class="section-title">TOP 5 HEADLINES</div>
     """
 
     for item in top_5:
@@ -235,9 +229,9 @@ def build_html_email(group_results, stock_data):
         """
 
     html += """
-            </div>
-            <div class="section">
-                <div class="section-title">WATCHLIST GROUP SUMMARIES</div>
+        </div>
+        <div class="section">
+            <div class="section-title">WATCHLIST GROUP SUMMARIES</div>
     """
 
     for group, items in group_results.items():
@@ -253,14 +247,14 @@ def build_html_email(group_results, stock_data):
             """
 
     html += """
-            </div>
-            <div class="footer">
-                Curated automatically via Purdchuk News Screener • Confidential
-            </div>
         </div>
-    </body>
-    </html>
-    """
+        <div class="footer">
+            Curated automatically via Purdchuk News Screener • Confidential
+        </div>
+    </div>
+</body>
+</html>
+"""
     return html
 
 def send_email():
@@ -274,7 +268,7 @@ def send_email():
 
     recipient_list = [
         {"email": email.strip()} 
-        for email in raw_recipients.split(",") 
+        for email in raw_recipients.replace(";", ",").split(",") 
         if email.strip()
     ]
 
@@ -286,16 +280,13 @@ def send_email():
     news_data = fetch_fresh_news()
     print(f"Feeds fetched. Found updates for {len(news_data)} groups.")
     
-    if not news_data:
-        html_content = f"<h3>Daily Watchlist News Summary</h3><p>Date: {datetime.now().strftime('%B %d, %Y')}</p><p>No fresh headlines matched your watchlist criteria today.</p>"
-    else:
-        html_content = build_html_email(news_data, stock_data)
+    html_content = build_html_email(news_data, stock_data)
 
     url = "https://api.brevo.com/v3/smtp/email"
     headers = {
         "accept": "application/json",
         "api-key": api_key,
-        "content-type": "application/json"
+        "content-type": "application/json; charset=utf-8"
     }
     payload = {
         "sender": {"name": "Purdchuk Screener", "email": sender_email},
@@ -304,10 +295,14 @@ def send_email():
         "htmlContent": html_content
     }
 
-    req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers)
+    req = urllib.request.Request(url, data=json.dumps(payload, ensure_ascii=False).encode('utf-8'), headers=headers)
     try:
         with urllib.request.urlopen(req) as response:
             print(f"Executive HTML Email dispatched successfully! Status code: {response.getcode()}")
+    except urllib.error.HTTPError as he:
+        error_body = he.read().decode('utf-8')
+        print(f"Failed to send email via Brevo API ({he.code}): {error_body}")
+        raise he
     except Exception as e:
         print(f"Failed to send email via Brevo API: {e}")
         raise e
