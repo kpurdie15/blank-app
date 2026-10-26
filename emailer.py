@@ -35,7 +35,7 @@ WATCHLIST_GROUPS = {
     "5N Plus": ["Planet Labs", "Eutelsat", "OneWeb", "5N Plus", "VNP", "Germanium", "Tellurium", "Cadmium", "AZUR Space", "Sierra Space", "Bismuth", "USA Rare Earth", "MP Materials", "First Solar"],
     "Firan": ["FTG", "Firan Technologies", "Airbus Deliveries", "Boeing Deliveries", "Printed Circuit Boards", "Cockpit Products"],
     "Neo Performance": ["NEO", "Neo Performance Materials", "Rare Earth Oxides", "Rare Earth Minerals"],
-    "Polaris": ["Polaris Renewable Energy", "PIF"],
+    "Polaris": ["Polaris Renewable Energy",],
     "DIRTT": ["DIRTT", "DRT"],
     "Biorem": ["BRM", "Biorem"],
     "Atlas": ["Atlas Engineered Products", "Canadian Roof Trusses", "Canadian Building Products"],
@@ -55,7 +55,7 @@ QUALIFIED_SOURCES = [
 ]
 
 DEFAULT_BLACKLIST = [
-    "NHL.com", "nhl.com", "motor1.com", "Motor1.com", "marketscreener.com", "MarketBeat", 
+    "NHL.com", "nhl.com", "motor1.com", "Motor1.com", "marketscreener.com", "MarketBeat", "LG에너지솔루션", "Spectrum Magazine", "Golf Digest", "Golf Channel", "Monochrome Watches", "Rider Guide",
     "EIN News", "Trefis", "electronics.economictimes.indiatimes.com", "Simply Wall St", 
     "Simply Wall Street", "Zacks Investment Research", "Stock Traders Daily", 
     "University of Central Florida", "Mining.com", "NerdWallet", "Semafor", "BusinessDesk | NZ",
