@@ -1,9 +1,12 @@
 name: Daily Morning Watchlist Email
 
 on:
+  schedule:
+    # 11:17 AM UTC = 6:17 AM EST (UTC-5)
+    - cron: "17 11 * * *"
+  workflow_dispatch:
   repository_dispatch:
     types: [trigger-daily-digest]
-  workflow_dispatch:
 
 jobs:
   send-email:
