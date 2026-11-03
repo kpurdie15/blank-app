@@ -32,7 +32,7 @@ WATCHLIST_GROUPS = {
     "Hammond Power": ["Hammond Power", "Dry Type Transformer", "Hyundai Electric", "AEG Power Systems", "Uninterruptible Power Supply", "Schneider Electric", "Siemens", "Eaton Corp", "SGB-SMIT", "SGB-SMIT IPO"],
     "Tantalus": ["Tantalus", "Tantalus Systems", "Smart metering systems", "Itron", "Landis + Gyr", "Grid Tech"],
     "Kraken": ["Kraken Robotics", "PNG", "REMUS", "NAVSEA", "Lockheed Martin", "L3Harris", "Airbus", "Rtx defense", "Northrop Grumman", "Thales Defense", "Subsea battery", "Kongsberg", "Cellula Robotics", "Huntington Ingalls", "Teledyne Technologies", "Anduril", "Covelya", "Sonardyne", "EIVA", "Forcys", "Wavefront", "Chelsea Technologies", "Voyis"],
-    "5N Plus": ["Planet Labs", "Eutelsat", "OneWeb", "5N Plus", "VNP", "Germanium", "Tellurium", "Cadmium", "AZUR Space", "Sierra Space", "Bismuth", "USA Rare Earth", "MP Materials", "First Solar"],
+    "5N Plus": ["Ocb Pharmaceutical", "Ocb Pharma", "Ocb Pharmaceutical S.r.l", "Planet Labs", "Eutelsat", "OneWeb", "5N Plus", "VNP", "Germanium", "Tellurium", "Cadmium", "AZUR Space", "Sierra Space", "Bismuth", "USA Rare Earth", "MP Materials", "First Solar"],
     "Firan": ["FTG", "Firan Technologies", "Airbus Deliveries", "Boeing Deliveries", "Printed Circuit Boards", "Cockpit Products"],
     "Neo Performance": ["NEO", "Neo Performance Materials", "Rare Earth Oxides", "Rare Earth Minerals"],
     "Polaris": ["Polaris Renewable Energy",],
@@ -56,13 +56,13 @@ QUALIFIED_SOURCES = [
 
 DEFAULT_BLACKLIST = [
     "NHL.com", "nhl.com", "motor1.com", "Motor1.com", "marketscreener.com", "MarketBeat", "LG에너지솔루션", "Spectrum Magazine", "Golf Digest", "Golf Channel", "Monochrome Watches", "Rider Guide",
-    "EIN News", "Trefis", "electronics.economictimes.indiatimes.com", "Simply Wall St", 
+    "EIN News", "Trefis", "electronics.economictimes.indiatimes.com", "Simply Wall St", "InsideEVs", "Slowtwitch news", "Live Law", 
     "Simply Wall Street", "Zacks Investment Research", "Stock Traders Daily", 
     "University of Central Florida", "Mining.com", "NerdWallet", "Semafor", "BusinessDesk | NZ",
     "Defense World", "Best Stocks", "The Star", "kalkine.ca", "Kalkine Media", "driving.ca", 
     "Artsy", "Yahoo! Finance Canada", "Durham Region Transit", "insauga.com", 
     "Team Nice Cote d'Azur", "The Motley Fool Canada", "investincotedazur", "acc.org", 
-    "American College of Cardiology", "AOL.com", "aol.com", "ATP Tour", "atptour.com", "Team Nice"
+    "American College of Cardiology", "AOL.com", "aol.com", "ATP Tour", "atptour.com", "Team Nice", "The Gadgeteer", "Mashable", "TCTMD.com", "The Inertia", "WaterWorld", "debelegger.nl", "The Gadgeteer",
 ]
 
 def fetch_stock_prices():
