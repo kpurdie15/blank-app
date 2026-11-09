@@ -55,7 +55,7 @@ QUALIFIED_SOURCES = [
 ]
 
 DEFAULT_BLACKLIST = [
-    "NHL.com", "nhl.com", "motor1.com", "Motor1.com", "marketscreener.com", "MarketBeat", "LG에너지솔루션", "Spectrum Magazine", "Golf Digest", "Golf Channel", "Monochrome Watches", "Rider Guide",
+    "NHL.com", "BBC Wildlife Magazine", "The Jerusalem Post", "nhl.com", "motor1.com", "Motor1.com", "marketscreener.com", "MarketBeat", "LG에너지솔루션", "Spectrum Magazine", "Golf Digest", "Golf Channel", "Monochrome Watches", "Rider Guide",
     "EIN News", "Trefis", "electronics.economictimes.indiatimes.com", "Simply Wall St", "InsideEVs", "Slowtwitch news", "Live Law", 
     "Simply Wall Street", "Zacks Investment Research", "Stock Traders Daily", 
     "University of Central Florida", "Mining.com", "NerdWallet", "Semafor", "BusinessDesk | NZ",
